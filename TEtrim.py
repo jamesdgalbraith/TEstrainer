@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import string
 import statistics
@@ -33,7 +35,7 @@ def single_trim(aln_in):
   good=aln_in[:,0:0]
   for x in range(aln_in.get_alignment_length()):
     # extract columns with more than 1 base pair
-    if (len(aln_in) - aln_in[:, x].count("-"))/len(aln_in) > 1/len(aln_in):
+    if len(aln_in) - aln_in[:, x].count("-") > 1:
       good=good+aln_in[:,x:x+1]
   return(good)
 bp_trimmed=single_trim(align)
@@ -80,7 +82,7 @@ def line_con(aln_in):
   for x in range(aln_in.get_alignment_length()):
     a = aln_in[:, x].count("a") + aln_in[:, x].count("A")
     t = aln_in[:, x].count("t") + aln_in[:, x].count("T")
-    c = aln_in[:, x].count("c") + aln_in[:, x].count("G")
+    c = aln_in[:, x].count("c") + aln_in[:, x].count("C")
     g = aln_in[:, x].count("g") + aln_in[:, x].count("G")
     gap = aln_in[:, x].count("-")
     if (len(aln_in) - gap) > 2:
