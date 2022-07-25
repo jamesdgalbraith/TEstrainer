@@ -1,13 +1,16 @@
 #!/bin/bash
 
+# parsing
+RM_LIBRARY=$(echo $RM_LIBRARY_PATH | sed 's/.*\///')
+
 # make directories
-mkdir -p data/run_0/raw out
+mkdir -p data/run_0/raw out/
 
 # cluster
-cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY} -o data/run_0/${RM_LIBRARY} # cluster seq
+cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o data/run_0/${RM_LIBRARY} # cluster seq
 
 # split
-PIECES="$(grep '>' data/run_0/${RM_LIBRARY})"
+PIECES="$(grep -c '>' data/run_0/${RM_LIBRARY})"
 Rscript scripts/splitter.R -t nt -f data/run_0/${RM_LIBRARY} -o data/run_0/raw out/ -p $PIECES # split query
 ls data/run_0/raw/${RM_LIBRARY}* | sed 's/.*\///' > data/run_0/to_run.txt # list queries
 
