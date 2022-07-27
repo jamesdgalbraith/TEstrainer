@@ -3,27 +3,40 @@
 library(optparse)
 
 option_list <- list(
-  make_option(c("-i", "--in_seq"), default=NA, type = "character", help="In sequence (required)"),
-  make_option(c("-n", "--iteration"), default=NA, type = "integer", help="Iteration number (required)"),
+  make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Path to input sequence (required)"),
+  make_option(c("-o", "--out"), default=NA, type = "character", help="Path to output folder (required)"),
+  make_option(c("-r", "--run_rps"), default=TRUE, type = "logical", help="Run rpstblastn filter (default TRUE)"),
+  make_option(c("-b", "--rps_table"), default=NA, type = "character", help="Path rpstblastn table"),
   make_option(c("-t", "--run_trf"), default=FALSE, type = "logical", help="Run trf filter (default FALSE)"),
-  make_option(c("-r", "--run_rps"), default=TRUE, type = "logical", help="Run rpstblastn filter (default TRUE)")
+  make_option(c("-f", "--trf_table"), default=NA, type = "character", help="Path to trf table")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
 opt$seq <- sub(".*/", "", opt$in_seq)
-
-suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(plyranges))
-suppressPackageStartupMessages(library(BSgenome))
-
-
 # check variables provided
 if(is.na(opt$in_seq)){
   stop("Path to in sequence must be supplied")
 }
-if(is.na(opt$iteration)){
-  stop("Iteration number must be specified")
+if(is.na(opt$out)){
+  stop("Path to in sequence must be supplied")
 }
+if(opt$run_rps == TRUE){
+  if(is.na(opt$rps_table)){
+    stop("To run filter using rps path to table must be supplied")
+  }
+}
+if(opt$run_trf == TRUE){
+  if(is.na(opt$trf_table)){
+    stop("To run filter using trf path to table must be supplied")
+  }
+}
+
+# make empty variable function
+check=function(x) tryCatch(if(class(x) == 'logical') TRUE else TRUE, error=function(e) FALSE)
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(plyranges))
+suppressPackageStartupMessages(library(BSgenome))
 
 # read in fasta
 rm_seq_in <- readDNAStringSet(paste0(opt$in_seq))
@@ -34,63 +47,67 @@ if(isTRUE(opt$run_rps)){
   acceptable_domains <- read_tsv("data/acceptable_domains.tsv", show_col_types = FALSE)
 
   # read rps blast out
-  rps_blast_out <- suppressWarnings(read_tsv(file = paste0("data/", opt$seq, ".rps.out"),
+  rps_blast_out <- read_tsv(file = opt$rps_table,
                             col_names = c("seqnames", "qstart", "qend", "qlen", "sseqid", "sstart", "send", "slen",
                                           "pident", "length", "mismatch", "gapopen", "evalue", "bitscore", "qcovs", "stitle"),
                             show_col_types = FALSE) %>%
-    separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ") %>%
-    dplyr::filter(length >= 0.5*slen))
-
-  # select acceptable and non acceptable
-  contains_acceptable <- rps_blast_out[rps_blast_out$ref %in% acceptable_domains$ref,]
-  contains_unacceptable <- rps_blast_out[!rps_blast_out$ref %in% acceptable_domains$ref,]
-
-  # Filter repeats containing only suitable domains
-  completely_acceptable <- rps_blast_out %>%
-    filter(seqnames %in% contains_acceptable$seqnames,
-           !seqnames %in% contains_unacceptable$seqnames) %>%
-    arrange(seqnames, qstart)
-
-  # Filter repeats containing no suitable domains
-  questionable <- rps_blast_out %>%
-    filter(!seqnames %in% contains_acceptable$seqnames,
-           seqnames %in% contains_unacceptable$seqnames) %>%
-    arrange(seqnames, qstart)
-
-  # Filter repeats containing both suitable and unsuitable domains
-  chimeric <- rps_blast_out %>%
-    filter(seqnames %in% contains_acceptable$seqnames,
-           seqnames %in% contains_unacceptable$seqnames) %>%
-    arrange(seqnames, qstart) %>%
-    mutate(unacceptable = ifelse(ref %in% acceptable_domains$ref, "false", "true"))
-
-  # Potentially mask out genic regions of chimeric repeats
-  chimeric_ranges <- chimeric %>%
-    dplyr::mutate(start = ifelse(qstart < qend, qstart, qend),
-                  end = ifelse(qstart > qend, qstart, qend),
-                  strand = ifelse(qstart < qend, "+", "-")) %>%
-    dplyr::select(seqnames, start, end, strand, abbrev, unacceptable) %>%
-    plyranges::as_granges()
-
-  chimeric_ranges_unacceptable_false <- chimeric_ranges[chimeric_ranges$unacceptable == "false",]
-  chimeric_ranges_unacceptable_true <- chimeric_ranges[chimeric_ranges$unacceptable == "true",]
-
-  # find regions which don't overlap with acceptable domains
-  truly_chimeric_ranges <- filter_by_non_overlaps(chimeric_ranges_unacceptable_true, chimeric_ranges_unacceptable_false)
-
-  truly_chimeric <- chimeric[chimeric$seqnames %in% seqnames(truly_chimeric_ranges),]
-  false_positive_chimeric <- chimeric[!chimeric$seqnames %in% seqnames(truly_chimeric_ranges),] %>%
-    dplyr::select(-unacceptable)
-  compiled_acceptable <- rbind(completely_acceptable, false_positive_chimeric)
-
-  # identify sequences with no domains
-  no_domains <- rm_seq_in[!names(rm_seq_in) %in% c(chimeric$seqnames, completely_acceptable$seqnames, questionable$seqnames)]
+    separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ")
+  if(nrow(rps_blast_out) > 0){
+    dplyr::filter(length >= 0.5*slen)
+    
+    rps_blast_out <- rps_blast_out %>% dplyr::filter(length >= 0.5*slen)
+    
+    # select acceptable and non acceptable
+    contains_acceptable <- rps_blast_out[rps_blast_out$ref %in% acceptable_domains$ref,]
+    contains_unacceptable <- rps_blast_out[!rps_blast_out$ref %in% acceptable_domains$ref,]
+    
+    # Filter repeats containing only suitable domains
+    completely_acceptable <- rps_blast_out %>%
+      filter(seqnames %in% contains_acceptable$seqnames,
+             !seqnames %in% contains_unacceptable$seqnames) %>%
+      arrange(seqnames, qstart)
+    
+    # Filter repeats containing no suitable domains
+    questionable <- rps_blast_out %>%
+      filter(!seqnames %in% contains_acceptable$seqnames,
+             seqnames %in% contains_unacceptable$seqnames) %>%
+      arrange(seqnames, qstart)
+    
+    # Filter repeats containing both suitable and unsuitable domains
+    chimeric <- rps_blast_out %>%
+      filter(seqnames %in% contains_acceptable$seqnames,
+             seqnames %in% contains_unacceptable$seqnames) %>%
+      arrange(seqnames, qstart) %>%
+      mutate(unacceptable = ifelse(ref %in% acceptable_domains$ref, "false", "true"))
+    
+    # Potentially mask out genic regions of chimeric repeats
+    chimeric_ranges <- chimeric %>%
+      dplyr::mutate(start = ifelse(qstart < qend, qstart, qend),
+                    end = ifelse(qstart > qend, qstart, qend),
+                    strand = ifelse(qstart < qend, "+", "-")) %>%
+      dplyr::select(seqnames, start, end, strand, abbrev, unacceptable) %>%
+      plyranges::as_granges()
+    
+    chimeric_ranges_unacceptable_false <- chimeric_ranges[chimeric_ranges$unacceptable == "false",]
+    chimeric_ranges_unacceptable_true <- chimeric_ranges[chimeric_ranges$unacceptable == "true",]
+    
+    # find regions which don't overlap with acceptable domains
+    truly_chimeric_ranges <- filter_by_non_overlaps(chimeric_ranges_unacceptable_true, chimeric_ranges_unacceptable_false)
+    
+    truly_chimeric <- chimeric[chimeric$seqnames %in% seqnames(truly_chimeric_ranges),]
+    false_positive_chimeric <- chimeric[!chimeric$seqnames %in% seqnames(truly_chimeric_ranges),] %>%
+      dplyr::select(-unacceptable)
+    compiled_acceptable <- rbind(completely_acceptable, false_positive_chimeric)
+    
+    # identify sequences with no domains
+    no_domains_seq <- rm_seq_in[!names(rm_seq_in) %in% c(chimeric$seqnames, completely_acceptable$seqnames, questionable$seqnames)]
+  }
 
 }
 
 if(isTRUE(opt$run_trf)){
   # tandem repeat filtering (optional)
-  trf_out_ranges <- read_gff3(paste0("data/", opt$seq, ".trf.gff"))
+  trf_out_ranges <- read_gff3(opt$trf_table)
 
   trf_out_tbl <- as_tibble(trf_out_ranges) %>%
     mutate(copies = as.double(copies),
@@ -111,11 +128,17 @@ if(isTRUE(opt$run_trf)){
 
 }
 
-# write to file
-completely_acceptable_seq <- rm_seq_in[names(rm_seq_in) %in% compiled_acceptable$seqnames]
-no_domains_seq <- no_domains
-writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0("data/run_", opt$iteration, "/clean_", opt$seq))
-chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
-writeXStringSet(chimeric_seq, paste0("data/run_", opt$iteration, "/chimeric_", opt$seq))
-questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
-writeXStringSet(questionable_seq, paste0("data/run_", opt$iteration, "/questionable_", opt$seq))
+## add step to combine data
+
+# write to file (check if any filtered, if not write all in to output)
+if(check(compiled_acceptable) == TRUE){
+  completely_acceptable_seq <- rm_seq_in[names(rm_seq_in) %in% compiled_acceptable$seqnames]
+  writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$out, "/clean_", opt$seq))
+  chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
+  writeXStringSet(chimeric_seq, paste0(opt$out, "/chimeric_", opt$seq))
+  questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
+  writeXStringSet(questionable_seq, paste0(opt$out, "/questionable_", opt$seq))
+} else {
+  writeXStringSet(rm_seq_in, paste0(opt$out, "/clean_", opt$seq))
+}
+

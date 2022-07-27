@@ -34,7 +34,7 @@ suppressPackageStartupMessages({
 })
 
 message("Reading blast")
-blast_out <- read_tsv(file = paste0("data/run_", opt$iteration, "/initial_blast.out"),
+blast_out <- read_tsv(file = paste0("data/run_", opt$iteration, "/",  opt$library,"_initial_blast.out"),
                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend",
                                     "qlen", "sstart", "send", "slen", "evalue", "bitscore", "qcovs"),
                       show_col_types = F)

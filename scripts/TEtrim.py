@@ -27,7 +27,7 @@ parser.add_argument('-w', '--window', type=int,
                     help='Window size for blocks', default=5)
 
 args = parser.parse_args()
-# args = argparse.Namespace(in_seq="data/run_1/mafft/Echis_carinatus_rnd-1_family-117.fasta", iteration="1", threads="1", flanks="1500", debug='FALSE', window_size=5)
+# args = argparse.Namespace(in_seq="data/run_2/mafft/Echis_carinatus_rnd-1_family-587.fasta", iteration="2", threads="1", flank=1500, debug='TRUE', window_size=5)
 
 # function for removing single base pair insertions
 def single_trim(aln_in):
@@ -61,7 +61,6 @@ def con_maker(aln_in):
 seq_name=re.sub('.*/', '', args.in_seq)
 in_seq_path='data/run_'+args.iteration+'/mafft/'+seq_name
 out_seq_path='data/run_'+args.iteration+'/TEtrim/'+seq_name
-
 
 # read sequence
 if args.debug == 'TRUE':
@@ -97,13 +96,16 @@ with open(('data/run_'+args.iteration+'/TEtrim_unaln/temp_'+seq_name), "w") as o
 
 ### run blast ###
 if args.debug == 'TRUE':
-  print('Reading determining number of sequences')
+  print('Determining number of sequences')
 os.system('blastn -query data/run_'+args.iteration+'/TEtrim_con/og_'+seq_name+' -subject data/run_'+args.iteration+'/TEtrim_unaln/temp_'+seq_name+' -outfmt "6 qseqid sseqid qcovs" -task blastn | uniq > data/run_'+args.iteration+'/TEtrim_blast/'+seq_name+'.tsv')
 
 # read initial blast, determine acceptable passed on coverage >50% mean of coverage
 if args.debug == 'TRUE':
   print('Reading initial blast')
 df = pd.read_table(('data/run_'+args.iteration+'/TEtrim_blast/'+seq_name+'.tsv'), names=['qseqid', 'sseqid', 'qcovs'])
+if df.empty is True:
+  SeqIO.write(og_con, ('data/run_'+args.iteration+'/TEtrim_complete/'+seq_name),"fasta")
+  sys.exit(('New consensus of '+seq_name+" has no homology to original sequence"))
 mean_covs=(statistics.mean(df.qcovs)/2)
 acceptable=list(df.query("(qcovs>@mean_covs) or (qcovs>50)")['sseqid'])
 

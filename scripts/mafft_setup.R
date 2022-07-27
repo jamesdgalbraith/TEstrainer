@@ -4,7 +4,7 @@ suppressPackageStartupMessages({
   library(optparse)
 })
 
-
+opt
 # parse input variables
 option_list <- list(
   make_option(c("-g", "--genome"), type="character", default=NULL,
@@ -32,12 +32,10 @@ suppressPackageStartupMessages({
 })
 
 # determine queries
-
 queries <- read_tsv(paste0("data/run_", opt$iteration, "/self_queries.txt"), col_names = "qseqid", show_col_types = F)
 
 # make placeholders for files to/not to align
 to_align <- tibble(query = character())
-not_align <- tibble(query = character())
 
 for (i in seq_along(queries$qseqid)) {
   
@@ -82,5 +80,9 @@ write_tsv(to_align, paste0("data/run_", opt$iteration, "/to_align.txt"), col_nam
 # create file of unextendable repeats
 consensus_seq <- Biostrings::readDNAStringSet(filepath = paste0("data/run_", opt$iteration, "/", opt$library))
 names(consensus_seq) <- sub(" .*", "", names(consensus_seq))
-writeXStringSet(consensus_seq[!sub("#.*", "", names(consensus_seq)) %in% sub(".fasta", "", to_align$query)],
-                filepath = paste0("data/run_", opt$iteration, "/rare_", opt$library))
+rare_seq <- consensus_seq[!sub("#.*", "", names(consensus_seq)) %in% sub(".fasta", "", to_align$query)]
+if(length(rare_seq) > 0){
+  for ( i in 1:length(rare_seq)){
+    writeXStringSet(rare_seq[i], filepath = paste0("data/run_", opt$iteration, "/TEtrim_complete/", sub("#.*", "", names(rare_seq))[i], ".fasta"))
+    }
+}
