@@ -11,7 +11,11 @@ option_list = list(
   make_option(c("-t", "--type"), type="character", default=NULL, 
               help="sequence type (DNA or AA)", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="split/", 
-              help="path to output [default= %default]", metavar="character")
+              help="path to output [default= %default]", metavar="character"),
+  make_option(c("-r", "--rename"), action="store_true", default=TRUE,
+              help="Name output files based on file number"),
+  make_option(c("-n", "--name"), action="store_false", 
+              dest="rename", help="Name output files after first sequence")
   
 )
 
@@ -43,6 +47,12 @@ if(no_seq < opt$pieces){opt$pieces <- no_seq}
 
 # Split and write to file
 for( i in 1:opt$pieces){
-  Biostrings::writeXStringSet(x = compiled_seq[(ceiling((i-1)*no_seq/opt$pieces)+1):(ceiling((i)*no_seq/opt$pieces))],
-                  filepath = paste0(opt$out, "/", sub(".*/", "", opt$file),"_seq_", i, ".fasta"))
+  
+  out_seq <- compiled_seq[(ceiling((i-1)*no_seq/opt$pieces)+1):(ceiling((i)*no_seq/opt$pieces))]
+  if(isTRUE(opt$rename)){
+    Biostrings::writeXStringSet(x = out_seq, filepath = paste0(opt$out, "/", sub(".*/", "", opt$file),"_seq_", i, ".fasta"))
+  } else {
+    Biostrings::writeXStringSet(x = out_seq, filepath = paste0(opt$out, "/", sub("#.*", "", names(out_seq)[1]), ".fasta"))
+  }
+  
 }
