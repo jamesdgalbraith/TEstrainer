@@ -37,7 +37,7 @@ if (opt$type %in% c("dna", "DNA")) {
 }
 
 # if outdir doesn't exist create
-if(!dir.exists(opt$out)){dir.create(opt$out)}
+if(!dir.exists(opt$out)){dir.create(opt$out, recursive = T)}
 
 # Count number of sequences
 no_seq <- length(compiled_seq)
@@ -45,14 +45,20 @@ no_seq <- length(compiled_seq)
 # Check number of output files is less than or equal desired umber of pieces
 if(no_seq < opt$pieces){opt$pieces <- no_seq}
 
+out_list <- dplyr::tibble(file_name = character())
+
 # Split and write to file
 for( i in 1:opt$pieces){
   
   out_seq <- compiled_seq[(ceiling((i-1)*no_seq/opt$pieces)+1):(ceiling((i)*no_seq/opt$pieces))]
   if(isTRUE(opt$rename)){
     Biostrings::writeXStringSet(x = out_seq, filepath = paste0(opt$out, "/", sub(".*/", "", opt$file),"_seq_", i, ".fasta"))
+    out_list <- base::rbind(out_list, dplyr::tibble(file_name = paste0(sub(".*/", "", opt$file),"_seq_", i, ".fasta")))
   } else {
     Biostrings::writeXStringSet(x = out_seq, filepath = paste0(opt$out, "/", sub("#.*", "", names(out_seq)[1]), ".fasta"))
+    out_list <- base::rbind(out_list, dplyr::tibble(paste0(sub("#.*", "", names(out_seq)[1]), ".fasta")))
   }
   
 }
+
+readr::write_tsv(out_list, paste0(opt$out, "/", sub(".*/", "", opt$file), "_split.txt"), col_names = F)
