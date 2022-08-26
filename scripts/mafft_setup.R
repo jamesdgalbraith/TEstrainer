@@ -4,7 +4,6 @@ suppressPackageStartupMessages({
   library(optparse)
 })
 
-opt
 # parse input variables
 option_list <- list(
   make_option(c("-g", "--genome"), type="character", default=NULL,
@@ -12,7 +11,9 @@ option_list <- list(
   make_option(c("-l", "--library"), type="character", default=NULL,
               help="Path to library", metavar="character"),
   make_option(c("-n", "--iteration"), default=NULL, type = "integer",
-              help="Iteration number (required)")
+              help="Iteration number (required)"),
+  make_option(c("-d", "--directory"), type="character", default=NULL,
+              help="Path to data directory", metavar="character")
 )
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -24,6 +25,9 @@ if (is.null(opt$genome)) {
   # set genome names
   opt$genome_name <- sub(".*/", "", opt$genome)
 }
+if (is.null(opt$directory)){
+  stop("Data directory needed")
+}
 
 suppressPackageStartupMessages({
   library(BSgenome)
@@ -32,16 +36,16 @@ suppressPackageStartupMessages({
 })
 
 # determine queries
-queries <- read_tsv(paste0("data/run_", opt$iteration, "/self_queries.txt"), col_names = "qseqid", show_col_types = F)
+queries <- read_tsv(paste0(opt$directory, "/run_", opt$iteration, "/self_queries.txt"), col_names = "qseqid", show_col_types = F)
 
 # make placeholders for files to/not to align
 to_align <- tibble(query = character())
 
 for (i in seq_along(queries$qseqid)) {
   
-  in_seq <- Biostrings::readDNAStringSet(filepath = paste0("data/run_", opt$iteration, "/initial_seq/", queries$qseqid[i])) # read in sequence
+  in_seq <- Biostrings::readDNAStringSet(filepath = paste0(opt$directory, "/run_", opt$iteration, "/initial_seq/", queries$qseqid[i])) # read in sequence
   
-  self_out <- read_tsv(file = paste0("data/run_", opt$iteration, "/self_search/", queries$qseqid[i], ".out"), # read in blast data
+  self_out <- read_tsv(file = paste0(opt$directory, "/run_", opt$iteration, "/self_search/", queries$qseqid[i], ".out"), # read in blast data
                        col_names = c("seqnames", "sseqid", "pident", "length", "qstart", "qend",
                                      "qlen", "sstart", "send", "slen", "evalue", "bitscore"), show_col_types = F) %>%
     filter(sseqid != seqnames) %>% # remove self hits
@@ -68,21 +72,21 @@ for (i in seq_along(queries$qseqid)) {
   
   out_seq <- c(in_seq[1], out_seq) # add original sequence
   
-  writeXStringSet(out_seq, paste0("data/run_", opt$iteration, "/to_align/", queries$qseqid[i])) # write to file
+  writeXStringSet(out_seq, paste0(opt$directory, "/run_", opt$iteration, "/to_align/", queries$qseqid[i])) # write to file
   
   to_align <- rbind(to_align, tibble(query = queries$qseqid[i]))
 
 }
 
 # write list of sequences to be aligned to file
-write_tsv(to_align, paste0("data/run_", opt$iteration, "/to_align.txt"), col_names = F)
+write_tsv(to_align, paste0(opt$directory, "/run_", opt$iteration, "/to_align.txt"), col_names = F)
 
 # create file of unextendable repeats
-consensus_seq <- Biostrings::readDNAStringSet(filepath = paste0("data/run_", opt$iteration, "/", opt$library))
+consensus_seq <- Biostrings::readDNAStringSet(filepath = paste0(opt$directory, "/run_", opt$iteration, "/", opt$library))
 names(consensus_seq) <- sub(" .*", "", names(consensus_seq))
 rare_seq <- consensus_seq[!sub("#.*", "", names(consensus_seq)) %in% sub(".fasta", "", to_align$query)]
 if(length(rare_seq) > 0){
   for ( i in 1:length(rare_seq)){
-    writeXStringSet(rare_seq[i], filepath = paste0("data/run_", opt$iteration, "/TEtrim_complete/", sub("#.*", "", names(rare_seq))[i], ".fasta"))
+    writeXStringSet(rare_seq[i], filepath = paste0(opt$directory, "/run_", opt$iteration, "/TEtrim_complete/", sub("#.*", "", names(rare_seq))[i], ".fasta"))
     }
 }

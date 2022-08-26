@@ -11,6 +11,8 @@ option_list = list(
               help="Path to genome", metavar="character"),
   make_option(c("-l", "--library"), type="character", default=NULL,
               help="Path to library", metavar="character"),
+  make_option(c("-d", "--directory"), type="character", default=NULL,
+              help="Path to data directory", metavar="character"),
   make_option(c("-n", "--iteration"), default=NULL, type = "integer",
               help="Iteration number (required)"),
   make_option(c("-f", "--flank"), type="integer", default=1500,
@@ -19,14 +21,16 @@ option_list = list(
 
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
-# opt <- list(genome = "seq/Echis_ycKpl.FINAL.fasta", library = "data/run_1/Echis_RepeatModeler.fasta", iteration = 1, flank = 1500)
+
 if (is.null(opt$genome)) {
   stop("Path to genome is needed")
 } 
 if (is.null(opt$iteration)){
   stop("Interation number needed")
 }
-
+if (is.null(opt$directory)){
+  stop("Data directory needed")
+}
 suppressPackageStartupMessages({
   library(BSgenome)
   library(plyranges)
@@ -34,7 +38,7 @@ suppressPackageStartupMessages({
 })
 
 message("Reading blast")
-blast_out <- read_tsv(file = paste0("data/run_", opt$iteration, "/",  opt$library,"_initial_blast.out"),
+blast_out <- read_tsv(file = paste0(opt$directory, "/run_", opt$iteration, "/",  opt$library,"_initial_blast.out"),
                       col_names = c("qseqid", "seqnames", "pident", "length", "qstart", "qend",
                                     "qlen", "sstart", "send", "slen", "evalue", "bitscore", "qcovs"),
                       show_col_types = F)
@@ -69,11 +73,11 @@ blast_out_tbl <- tibble(qseqid = names(table(blast_out_merged$qseqid)), n = as.i
 genome_seq <- Biostrings::readDNAStringSet(filepath = opt$genome)
 names(genome_seq) <- sub(" .*", "", names(genome_seq))
 
-consensus_seq <- Biostrings::readDNAStringSet(filepath = paste0("data/run_", opt$iteration, "/", opt$library))
+consensus_seq <- Biostrings::readDNAStringSet(filepath = paste0(opt$directory, "/run_", opt$iteration, "/", opt$library))
 names(consensus_seq) <- sub(" .*", "", names(consensus_seq))
 
-if(!dir.exists(paste0("data/run_", opt$iteration, "/initial_seq/"))){
-  dir.create(paste0("data/run_", opt$iteration, "/initial_seq/"))
+if(!dir.exists(paste0(opt$directory, "/run_", opt$iteration, "/initial_seq/"))){
+  dir.create(paste0(opt$directory, "/run_", opt$iteration, "/initial_seq/"))
 }
 
 # create unaligned multifasta
@@ -87,7 +91,7 @@ for(i in seq_along(blast_out_tbl$qseqid)){
   align_seq <- c(consensus_seq[names(consensus_seq) == blast_out_tbl$qseqid[i]], align_seq)
   
   Biostrings::writeXStringSet(x = align_seq,
-                              filepath = paste0("data/run_", opt$iteration, "/initial_seq/",
+                              filepath = paste0(opt$directory, "/run_", opt$iteration, "/initial_seq/",
                                                 sub("#.*", "", blast_out_tbl$qseqid[i]), ".fasta"))
 
 }
