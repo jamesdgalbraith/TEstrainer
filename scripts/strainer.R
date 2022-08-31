@@ -5,7 +5,7 @@ library(optparse)
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Path to input sequence (required)"),
   make_option(c("-o", "--out"), default=NA, type = "character", help="Path to output folder (required)"),
-  make_option(c("-b", "--rps_table"), default=NA, type = "character", help="Path rpstblastn table")
+  make_option(c("-b", "--rpstblastn_table"), default=NA, type = "character", help="Path rpstblastn table")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))

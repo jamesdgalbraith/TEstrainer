@@ -9,19 +9,18 @@ RUNS=0
 CLUSTER=FALSE
 
 # parsing
-while getopts l:g:t:f:r:ch flag
-do
-    case "${flag}" in
-        l) RM_LIBRARY_PATH=${OPTARG};;
-        g) GENOME=${OPTARG};;
-        t) THREADS=${OPTARG};;
-        f) FLANK=${OPTARG};;
-        r) RUNS=${OPTARG};;
-        c) CLUSTER=TRUE ;;
-        h | *)
-          print_usage
-          exit_script
-    esac
+while getopts l:g:t:f:r:ch flag; do
+  case "${flag}" in
+      l) RM_LIBRARY_PATH=${OPTARG};;
+      g) GENOME=${OPTARG};;
+      t) THREADS=${OPTARG};;
+      f) FLANK=${OPTARG};;
+      r) RUNS=${OPTARG};;
+      c) CLUSTER=TRUE ;;
+      h | *)
+        print_usage
+        exit_script
+  esac
 done
 
 RM_LIBRARY=$(echo $RM_LIBRARY_PATH | sed 's/.*\///')
@@ -177,7 +176,7 @@ done<${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt
 sa-ssr -e -l 20 -L 50000 -m 1 -M 5000 -t 128 ${DATA_DIR}/curated/cleaned_${RM_LIBRARY} ${DATA_DIR}/trf/cleaned_${RM_LIBRARY}.sassr
 
 # Running mreps and parse
-parallel --bar --jobs 128 -a ${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt bash mreps_parser.sh -i ${DATA_DIR}/trf/split/{}
+parallel --bar --jobs 128 -a ${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt bash scripts/mreps_parser.sh -i ${DATA_DIR}/trf/split/{}
 while read a; do
   awk '{OFS="\t"}{print FILENAME,$1,$2,$3,$4,$5,$6,$7}' ${DATA_DIR}/trf/split/${a}.mreps.txt | sed 's/.*\///;s/.fasta.mreps.txt//' >> ${DATA_DIR}/trf/cleaned_${RM_LIBRARY}.mreps;
 done<${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt
@@ -185,10 +184,10 @@ done<${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt
 # Interpret mreps, TRF and SA-SSR
 Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/curated/cleaned_${RM_LIBRARY} -d ${DATA_DIR}
 
-# # Classify improved consensi using RepeatModeler's RepeatClassifier
-# cd ${DATA_DIR}/trf/
-# RepeatClassifier -pa $THREADS -consensi cleaned_${RM_LIBRARY}
-# cd ../../
-# 
-# # Trim chimeric elements
-# rpstblastn -query ${DATA_DIR}/curated/chimeric_${RM_LIBRARY} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/curated/chimeric_${RM_LIBRARY}.out -outfmt "6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle" -evalue 0.01 -num_threads $THREADS
+# Classify improved consensi using RepeatModeler's RepeatClassifier
+cd ${DATA_DIR}/trf/
+RepeatClassifier -pa $THREADS -consensi cleaned_${RM_LIBRARY}
+cd ../../
+
+# Trim chimeric elements
+rpstblastn -query ${DATA_DIR}/curated/chimeric_${RM_LIBRARY} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/curated/chimeric_${RM_LIBRARY}.out -outfmt "6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle" -evalue 0.01 -num_threads $THREADS
