@@ -23,27 +23,23 @@ while getopts l:g:t:f:r:ch flag; do
   esac
 done
 
-# determine furtehr variables
+# determine further variables
 RM_LIBRARY=$(echo $RM_LIBRARY_PATH | sed 's/.*\///')
 DATA_DIR=$(echo "TEstrainer_"$(date +"%H%M%S_%d%b"))
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
 echo $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS
-
 
 # make directories
 mkdir -p ${DATA_DIR}/run_0/ out/ ${DATA_DIR}/curated/
 
 # cluster and split step
 if [ "$CLUSTER" == TRUE ]; then
-  cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o ${DATA_DIR}/run_0/${RM_LIBRARY} # cluster seq
+  cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o ${DATA_DIR}/run_0/further_${RM_LIBRARY} # cluster seq
   PIECES="$(grep -c '>' ${DATA_DIR}/run_0/${RM_LIBRARY})"
 else
   cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
   PIECES="$(grep -c '>' ${DATA_DIR}/run_0/further_${RM_LIBRARY})"
 fi
-
-# put into pre-existing
-date
 
 # runs
 if [[ $RUNS -gt 0 ]]; then
@@ -119,7 +115,7 @@ if [[ $RUNS -gt 0 ]]; then
 else
 
   # for if no curation performed
-  cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY}
+  cp ${DATA_DIR}/run_0/further_${RM_LIBRARY} ${DATA_DIR}/${RM_LIBRARY}
 
 fi
 
@@ -131,9 +127,8 @@ Rscript scripts/splitter.R -f ${DATA_DIR}/${RM_LIBRARY} -p ${PIECES} -t DNA -o $
 # Running TRF
 echo "Running TRF"
 parallel --bar --jobs 128 -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/trf/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/trf/split/{}.trf
-while read a; do
-  awk '{OFS="\t"}{if ($4 >= 2) print FILENAME,$1,$2,$3,$4,$14}' ${DATA_DIR}/trf/split/${a}.trf | sed 's/.*\///;s/.fasta.trf//' >> ${DATA_DIR}/trf/${RM_LIBRARY}.trf;
-done<${DATA_DIR}/trf/split/cleaned_${RM_LIBRARY}_split.txt
+parallel --bar --jobs 128 -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt python3 scripts/trf_parser.py --trf ${DATA_DIR}/trf/split/{}.trf --out ${DATA_DIR}/trf/split/{}.trf.tsv
+parallel --bar --jobs 128 -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt cat ${DATA_DIR}/trf/split/{}.trf.tsv ">>" ${DATA_DIR}/trf/${RM_LIBRARY}.trf
 # Running SA-SSR
 echo "Running SA-SSR"
 sa-ssr -e -l 20 -L 50000 -m 1 -M 5000 -t 128 ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/trf/${RM_LIBRARY}.sassr
@@ -152,17 +147,28 @@ mkdir -p ${DATA_DIR}/chimeras/split/
 PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
 Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/ -p $PIECES
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
-cat ${DATA_DIR}/chimeras/split/*.out >> ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
-Rscript strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --out ${DATA_DIR}/chimeras/${RM_LIBRARY} --rps_table ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
+parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt cat ${DATA_DIR}/chimeras/split/{}.out > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
+# Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --out ${DATA_DIR}/chimeras/${RM_LIBRARY} --rps_table ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 
 
-# Classify improved consensi using RepeatModeler's RepeatClassifier
-echo "Reclassifying repeats"
-mkdir ${DATA_DIR}/classify/split
-PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
-Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/classify/split/ -p $PIECES
-cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/${RM_LIBRARY}
-cd ${DATA_DIR}/classify/
-RepeatClassifier -pa $THREADS -consensi ${RM_LIBRARY}
-cd -
-cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+# # Classify improved consensi using RepeatModeler's RepeatClassifier
+# echo "Reclassifying repeats"
+# mkdir -p ${DATA_DIR}/classify/
+# cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
+# cd ${DATA_DIR}/classify/
+# RepeatClassifier -pa {$THREADS} -consensi ${RM_LIBRARY}
+# # Classify improved consensi using a method based on RepeatModeler's RepeatClassifier
+# echo "Reclassifying repeats"
+# mkdir -p ${DATA_DIR}/classify/split
+# PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
+# Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/classify/split/ -p $PIECES
+# echo "BLASTN"
+# parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt blastn -db data/RepeatMasker.lib -xdrop_ungap 500 -xdrop_gap_final 1000 -xdrop_gap 125 -min_raw_gapped_score 250 -dust no -gapopen 25 -gapextend 5 -word_size 7 -outfmt \"6 std qlen slen stitle\" -query ${DATA_DIR}/classify/split/{} -out ${DATA_DIR}/classify/split/{}.nt.out
+# cat ${DATA_DIR}/classify/split/${RM_LIBRARY}*.nt.out > ${DATA_DIR}/classify/${RM_LIBRARY}.nt.out
+# echo "BLASTX"
+# parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt blastx -db data/RepeatPeps.lib -word_size 2 -outfmt \"6 std qlen slen stitle\" -query ${DATA_DIR}/classify/split/{} -out ${DATA_DIR}/classify/split/{}.aa.out
+# cat ${DATA_DIR}/classify/split/${RM_LIBRARY}*.aa.out > ${DATA_DIR}/classify/${RM_LIBRARY}.aa.out
+# echo "TRF"
+# parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/classify/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/classify/split/{}.trf
+# parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt python3 scripts/trf_parser.py --trf ${DATA_DIR}/classify/split/{}.trf --out ${DATA_DIR}/classify/split/{}.trf.tsv
+# parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt cat ${DATA_DIR}/classify/split/{}.trf.tsv ">>" ${DATA_DIR}/classify/${RM_LIBRARY}.trf

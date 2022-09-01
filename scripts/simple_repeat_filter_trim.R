@@ -4,7 +4,8 @@ library(optparse)
 
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Input sequence (required)"),
-  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character")
+  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character"),
+  make_option(c("-s", "--sort"), type="logical", default=FALSE, help="Set to sort final output")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
@@ -16,7 +17,7 @@ if(is.na(opt$in_seq)){
 if(is.na(opt$directory)){
   stop("Path to in sequence must be supplied")
 }
-
+opt <- list(in_seq = "seq/dfam_lepidosaurs.fasta", directory = "TEstrainer_143116_01Sep/")
 opt$out_seq <- sub(".*/", "", opt$in_seq)
 
 # make empty variable function
@@ -184,13 +185,23 @@ writeXStringSet(untouched_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".non
 
 # put it all together
 compiled_fixed_seq <- c(macrosatellites_seq, other_satellites_seq, trimmed_seq, untouched_seq)
-compiled_fixed_sorted <- tibble(seqnames = names(compiled_fixed_seq), start = 1, end = width(compiled_fixed_seq),
-       numbering = sub(".*rnd-", "", sub("#.*", "", names(compiled_fixed_seq)))) %>%
-  mutate(round = as.integer(sub("_.*", "", numbering)), family = as.integer(sub(".*-", "", numbering))) %>%
-  arrange(round, family) %>%
-  as_granges()
-compiled_fixed_sorted_seq <- getSeq(compiled_fixed_seq, compiled_fixed_sorted)
-names(compiled_fixed_sorted_seq) <- seqnames(compiled_fixed_sorted)
 
-# write all corrected sequences
-writeXStringSet(compiled_fixed_sorted_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))
+if(opt$sort == TRUE){
+  
+  compiled_fixed_sorted <- tibble(seqnames = names(compiled_fixed_seq), start = 1, end = width(compiled_fixed_seq),
+         numbering = sub(".*rnd-", "", sub("#.*", "", names(compiled_fixed_seq)))) %>%
+    mutate(round = as.integer(sub("_.*", "", numbering)), family = as.integer(sub(".*-", "", numbering))) %>%
+    arrange(round, family, seqnames) %>%
+    as_granges()
+  compiled_fixed_sorted_seq <- getSeq(compiled_fixed_seq, compiled_fixed_sorted)
+  names(compiled_fixed_sorted_seq) <- seqnames(compiled_fixed_sorted)
+  
+  # write all corrected sequences
+  writeXStringSet(compiled_fixed_sorted_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))
+  
+} else {
+
+  writeXStringSet(compiled_fixed_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))  
+  
+}
+
