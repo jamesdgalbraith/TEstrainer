@@ -8,9 +8,7 @@ option_list <- list(
   make_option(c("-b", "--rps_table"), default=NA, type = "character", help="Path rpstblastn table")
 )
 
-opt <- list(in_seq = "TEstrainer_143116_01Sep/dfam_lepidosaurs.fasta", out = "TEstrainer_143116_01Sep/chimeras/", rps_table = "TEstrainer_143116_01Sep/chimeras/dfam_lepidosaurs.fasta.rps.out")
-
-# opt <- parse_args(OptionParser(option_list=option_list))
+opt <- parse_args(OptionParser(option_list=option_list))
 opt$seq <- sub(".*/", "", opt$in_seq)
 # check variables provided
 if(is.na(opt$in_seq)){
@@ -114,31 +112,40 @@ writeXStringSet(chimeric_seq, paste0(opt$out, "/chimeric_", opt$seq))
 questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
 writeXStringSet(questionable_seq, paste0(opt$out, "/questionable_", opt$seq))
 
-truly_chimeric
+# truly_chimeric
+# 
+# 
+# false_positive_chimeric_normal_ranges <- false_positive_chimeric[false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
+#   mutate(start = ifelse(qstart < qend, qstart, qend),
+#          end = ifelse(qstart > qend, qstart, qend),
+#          strand = ifelse(qstart < qend, "+", "-")) %>%
+#   dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
+#   as_granges() %>%
+#   reduce_ranges_directed(ref = ref, abbrev = abbrev)
+# 
+# false_positive_chimeric_odd_ranges <- false_positive_chimeric[!false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
+#   mutate(start = ifelse(qstart < qend, qstart, qend),
+#          end = ifelse(qstart > qend, qstart, qend),
+#          strand = ifelse(qstart < qend, "+", "-")) %>%
+#   dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
+#   as_granges() %>%
+#   reduce_ranges_directed(ref = ref, abbrev = abbrev)
+# 
+# overlapping <- join_overlap_intersect(false_positive_chimeric_normal_ranges, false_positive_chimeric_odd_ranges) %>%
+#   as_tibble() %>%
+#   dplyr::select(-ref.x) %>%
+#   mutate(ref.y = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(ref.y))))),
+#          abbrev.x = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(abbrev.x))))),
+#          abbrev.y = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(abbrev.y))))),
+#          seqnames = as.character(seqnames)) %>%
+#   arrange(abbrev.y, abbrev.x)
+# 
+# in_seq_names <- tibble(species = names(readDNAStringSet(in_seq))) %>%
+#   tidyr::separate(species, into = c("seqnames", "species"), sep = " @") %>%
+#   dplyr::mutate(family = sub(".*#", "", seqnames))
+# 
+# overlapping %>%
+#   inner_join(in_seq_names) %>%
+#   dplyr::select(seqnames, start, end, width, strand, abbrev.x, ref.y, abbrev.y, family, species) %>%
+#   View()
 
-
-false_positive_chimeric_normal_ranges <- false_positive_chimeric[false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
-  mutate(start = ifelse(qstart < qend, qstart, qend),
-         end = ifelse(qstart > qend, qstart, qend),
-         strand = ifelse(qstart < qend, "+", "-")) %>%
-  dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
-  as_granges() %>%
-  reduce_ranges_directed(ref = ref, abbrev = abbrev)
-
-false_positive_chimeric_odd_ranges <- false_positive_chimeric[!false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
-  mutate(start = ifelse(qstart < qend, qstart, qend),
-         end = ifelse(qstart > qend, qstart, qend),
-         strand = ifelse(qstart < qend, "+", "-")) %>%
-  dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
-  as_granges() %>%
-  reduce_ranges_directed(ref = ref, abbrev = abbrev)
-
-overlapping <- join_overlap_intersect(false_positive_chimeric_normal_ranges, false_positive_chimeric_odd_ranges) %>%
-  as_tibble() %>%
-  dplyr::select(-ref.x) %>%
-  mutate(ref.y = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(ref.y))))),
-         abbrev.x = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(abbrev.x)))))) %>%
-  arrange(abbrev.y, abbrev.x)
-
-overlapping %>%
-  View()

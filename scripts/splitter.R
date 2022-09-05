@@ -27,6 +27,8 @@ if (is.null(opt$file)) {
   stop("Input sequence is required. See script usage (--help)")
 }
 
+
+
 # check sequence type is provided
 if (opt$type %in% c("dna", "DNA")) {
   compiled_seq <- Biostrings::readDNAStringSet(opt$file)
@@ -50,7 +52,7 @@ out_list <- dplyr::tibble(file_name = character())
 # Split and write to file
 for( i in 1:opt$pieces){
   
-  out_seq <- compiled_seq[(ceiling((i-1)*no_seq/opt$pieces)+1):(ceiling((i)*no_seq/opt$pieces))]
+  out_seq <- compiled_seq[(ceiling((i-1)*no_seq/opt$pieces)+1):(ceiling(i*as.double(no_seq)/opt$pieces))]
   if(isTRUE(opt$rename)){
     Biostrings::writeXStringSet(x = out_seq, filepath = paste0(opt$out, "/", sub(".*/", "", opt$file),"_seq_", i, ".fasta"))
     out_list <- base::rbind(out_list, dplyr::tibble(file_name = paste0(sub(".*/", "", opt$file),"_seq_", i, ".fasta")))

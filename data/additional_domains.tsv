@@ -71,3 +71,17 @@ pfam04967	HTH_10	Pogona_vitticeps	DNA/TcMar-Tc1
 cd22358	SfsA-like_archaeal	Varanus_komodoensis	LINE/RTE-X
 pfam03157	Glutenin_hmw	Lacerta_bilineata	LINE/L2
 PTZ00449	PTZ00449	Sphenodon_punctatus	Unknown
+COG4974	XerD	LTR/DIRS	Chrysemys_picta_bellii
+PRK12495	PRK12495	LTR/DIRS	Chrysemys_picta_bellii
+pfam10545	MADF_DNA_bdg	DNA/PIF-Harbinger	Chrysemys_picta_bellii
+smart00595	MADF	DNA/PIF-Harbinger	Chrysemys_picta_bellii
+cd01709	RT_like_1	LINE/R2-NeSL	Chelonia_mydas
+pfam01527	HTH_Tnp_1	DNA/TcMar-Tigger	Chrysemys_picta_bellii
+NF033761	gliding_GltJ	LINE/L1-Tx1	Chelonoidis_abingdonii
+pfam00336	DNA_pol_viral_C	LTR/Gypsy	Malaclemys_terrapin_terrapin
+NF033580	transpos_IS5_3	DNA/PIF-Harbinger	Terrapene_carolina_triunguis
+pfam13696	zf-CCHC_2	LTR/Gypsy	Malaclemys_terrapin_terrapin
+pfam12776	Myb_DNA-bind_3	DNA/PIF-Harbinger	Gopherus_agassizii
+cd01835	SGNH_hydrolase_like_3	LINE/CR1	Platysternon_megacephalum
+NF033563	transpos_IS30	LTR/ERVL	Chrysemys_picta_bellii
+pfam01527	HTH_Tnp_1	DNA/TcMar-Tigger	Chrysemys_picta_bellii

@@ -17,7 +17,7 @@ if(is.na(opt$in_seq)){
 if(is.na(opt$directory)){
   stop("Path to in sequence must be supplied")
 }
-opt <- list(in_seq = "seq/dfam_lepidosaurs.fasta", directory = "TEstrainer_143116_01Sep/")
+
 opt$out_seq <- sub(".*/", "", opt$in_seq)
 
 # make empty variable function
