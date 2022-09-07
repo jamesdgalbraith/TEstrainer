@@ -34,6 +34,7 @@ sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"),
                   col_names = c("seqnames", "ssr", "count", "start"), skip = 1, show_col_types = F) %>%
   dplyr::mutate(period = as.double(width(ssr))) %>%
   dplyr::mutate(ssr_width = count*period, end = start + ssr_width, start = start +1) %>%
+                mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
   inner_join(in_seq_tbl, by = "seqnames") %>%
   arrange(seqnames) %>%
   filter(count > 2)
@@ -52,6 +53,7 @@ sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
 # read in and rearrange TRF data
 trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
                 col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F) %>%
+  mutate(draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
   dplyr::mutate(ssr_width = end - start + 1) %>%
   inner_join(in_seq_tbl, by = "draft_seqnames")
 
@@ -107,6 +109,7 @@ over50tr <- stats_tr %>%
   mutate(sassr_perc_tr = ifelse(is.na(sassr_perc_tr), 0, sassr_perc_tr),
          mreps_perc_tr = ifelse(is.na(mreps_perc_tr), 0, mreps_perc_tr),
          trf_perc_tr = ifelse(is.na(trf_perc_tr), 0, trf_perc_tr))
+
 satellites <- compiled_tr[compiled_tr$seqnames %in% over50tr$seqnames,] %>%
   dplyr::group_by(seqnames) %>%
   dplyr::arrange(-ssr_width, period) %>%
@@ -119,7 +122,7 @@ satellites <- compiled_tr[compiled_tr$seqnames %in% over50tr$seqnames,] %>%
 
 # for macrosatellites trim to get single copy
 macrosatellites <- satellites %>%
-  filter(max_perc_tr > 90) %>%
+  filter(max_perc_tr > 90, count >= 2) %>%
   filter(period > 200) %>%
   mutate(start = start + period,
          end = start + period) %>%
@@ -204,4 +207,3 @@ if(opt$sort == TRUE){
   writeXStringSet(compiled_fixed_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))  
   
 }
-

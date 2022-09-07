@@ -27,8 +27,6 @@ if (is.null(opt$file)) {
   stop("Input sequence is required. See script usage (--help)")
 }
 
-
-
 # check sequence type is provided
 if (opt$type %in% c("dna", "DNA")) {
   compiled_seq <- Biostrings::readDNAStringSet(opt$file)

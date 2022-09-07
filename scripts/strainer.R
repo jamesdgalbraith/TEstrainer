@@ -114,7 +114,6 @@ writeXStringSet(questionable_seq, paste0(opt$out, "/questionable_", opt$seq))
 
 # truly_chimeric
 # 
-# 
 # false_positive_chimeric_normal_ranges <- false_positive_chimeric[false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
 #   mutate(start = ifelse(qstart < qend, qstart, qend),
 #          end = ifelse(qstart > qend, qstart, qend),
@@ -140,12 +139,4 @@ writeXStringSet(questionable_seq, paste0(opt$out, "/questionable_", opt$seq))
 #          seqnames = as.character(seqnames)) %>%
 #   arrange(abbrev.y, abbrev.x)
 # 
-# in_seq_names <- tibble(species = names(readDNAStringSet(in_seq))) %>%
-#   tidyr::separate(species, into = c("seqnames", "species"), sep = " @") %>%
-#   dplyr::mutate(family = sub(".*#", "", seqnames))
-# 
-# overlapping %>%
-#   inner_join(in_seq_names) %>%
-#   dplyr::select(seqnames, start, end, width, strand, abbrev.x, ref.y, abbrev.y, family, species) %>%
-#   View()
-
+# View(overlapping)
