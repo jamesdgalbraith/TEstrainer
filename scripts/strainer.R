@@ -4,22 +4,20 @@ library(optparse)
 
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Path to input sequence (required)"),
-  make_option(c("-o", "--out"), default=NA, type = "character", help="Path to output folder (required)"),
-  make_option(c("-b", "--rps_table"), default=NA, type = "character", help="Path rpstblastn table")
+  make_option(c("-d", "--directory"), default=NA, type = "character", help="Path to directory (required)")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
-opt$seq <- sub(".*/", "", opt$in_seq)
+
 # check variables provided
 if(is.na(opt$in_seq)){
   stop("Path to in sequence must be supplied")
 }
-if(is.na(opt$out)){
-  stop("Path to in sequence must be supplied")
+if(is.na(opt$directory)){
+  stop("Path to directory must be supplied")
 }
-if(is.na(opt$rps_table)){
-  stop("Path to rpstblastn table must be supplied")
-}
+opt$in_seq <- sub(".*/", "", opt$in_seq)
+opt$rps_table <- paste0(opt$directory, "/chimeras/", opt$in_seq, ".rps.out")
 
 # make empty variable function
 suppressPackageStartupMessages(library(tidyverse))
@@ -27,7 +25,7 @@ suppressPackageStartupMessages(library(plyranges))
 suppressPackageStartupMessages(library(BSgenome))
 
 # read in fasta
-rm_seq_in <- readDNAStringSet(paste0(opt$in_seq))
+rm_seq_in <- readDNAStringSet(paste0(opt$directory, "/chimeras/prestrain_", opt$in_seq))
 names(rm_seq_in) <- sub(" .*", "", names(rm_seq_in))
 rm_seq_info <- tibble(seqnames = names(rm_seq_in), width = width(rm_seq_in))
 
@@ -42,10 +40,8 @@ additional_domains <- read_tsv("data/additional_domains.tsv", show_col_types = F
 acceptable_domains <- read_tsv("data/acceptable_domains.tsv", show_col_types = FALSE) %>%
   rbind(additional_domains)
 
-as_tibble(as.data.frame(table(additional_domains$ref))) %>% arrange(-Freq)
-
 if(file.size(opt$rps_table)==0){
-  writeXStringSet(rm_seq_in, paste0(opt$out, "/clean_", opt$seq))
+  writeXStringSet(rm_seq_in, paste0(opt$directory, "/clean_", opt$in_seq))
   quit()
 }
 
@@ -106,11 +102,11 @@ no_domains_seq <- rm_seq_in[!names(rm_seq_in) %in% c(chimeric$seqnames, complete
 ## add step to combine data
 # write to file (check if any filtered, if not write all in to output)
 completely_acceptable_seq <- rm_seq_in[names(rm_seq_in) %in% compiled_acceptable$seqnames]
-writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$out, "/clean_", opt$seq))
+writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directory, "/clean_", opt$in_seq))
 chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
-writeXStringSet(chimeric_seq, paste0(opt$out, "/chimeric_", opt$seq))
+writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeric_", opt$in_seq))
 questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
-writeXStringSet(questionable_seq, paste0(opt$out, "/questionable_", opt$seq))
+writeXStringSet(questionable_seq, paste0(opt$directory, "/questionable_", opt$in_seq))
 
 # truly_chimeric
 # 

@@ -32,8 +32,7 @@ if [[ $RUNS -gt 0 ]]; then
 fi
 
 # DATA_DIR=$(echo "TEstrainer_"$(date +"%H%M%S_%d%b"))
-DATA_DIR=$(echo ${RM_LIBRARY}"_TEstrainer_"$(date +"%H%M%S_%d%b"))
-# DATA_DIR="data_2/"
+DATA_DIR=$(echo "TS_"$(date +"%s")"_"${RM_LIBRARY})
 mkdir ${DATA_DIR}
 
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
@@ -148,7 +147,6 @@ sa-ssr -e -l 20 -L 50000 -m 1 -M 5000 -t ${THREADS} ${DATA_DIR}/${RM_LIBRARY} ${
 echo "Running mreps"
 parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt bash scripts/mreps_parser.sh -i ${DATA_DIR}/trf/split/{}
 find ./${DATA_DIR}/trf/split/ -type f -name "*mreps" -exec cat {} + | cat > ${DATA_DIR}/trf/${RM_LIBRARY}.mreps
-
 # Interpret mreps, TRF and SA-SSR
 echo "Trimming and sorting based on mreps, TRF, SA-SSR"
 Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DATA_DIR}
@@ -161,7 +159,7 @@ cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
 Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/ -p $PIECES
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
-# Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --out ${DATA_DIR}/chimeras/ --rps_table ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
+Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --out ${DATA_DIR}/chimeras/ --rps_table ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 #
 #
 # # # Classify improved consensi using RepeatModeler's RepeatClassifier
