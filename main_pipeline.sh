@@ -8,16 +8,19 @@ THREADS=4
 RUNS=0
 CLUSTER=FALSE
 DFAM=FALSE
+CLASSIFY=FALSE
 
 # parsing
-while getopts l:g:t:f:r:cDh flag; do
+while getopts l:g:t:f:r:d:cCDh flag; do
   case "${flag}" in
     l) RM_LIBRARY_PATH=${OPTARG};;
     g) GENOME=${OPTARG};;
     t) THREADS=${OPTARG};;
     f) FLANK=${OPTARG};;
     r) RUNS=${OPTARG};;
+    d) DATA_DIR=${OPTARG};;
     c) CLUSTER=TRUE ;;
+    C) CLASSIFY=TRUE;;
     D) DFAM=TRUE ;;
     h | *)
       print_usage
@@ -30,10 +33,14 @@ if [ -z ${RM_LIBRARY_PATH} ]; then echo "Library must be supplied"; usage; else 
 if [[ $RUNS -gt 0 ]]; then 
   if [ -z ${GENOME} ]; then echo "If refining genome must be supplied"; usage; fi
 fi
+if [ -z "$DATA_DIR" ]; then DATA_DIR=$(echo "TS_"$(date +"%s")"_"${RM_LIBRARY}); fi
 
-# DATA_DIR=$(echo "TEstrainer_"$(date +"%H%M%S_%d%b"))
-DATA_DIR=$(echo "TS_"$(date +"%s")"_"${RM_LIBRARY})
-mkdir ${DATA_DIR}
+# create data dir if missing
+if [ ! -d ${DATA_DIR} ] 
+then
+    mkdir ${DATA_DIR}
+fi
+
 
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
 echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS "Cluster is" ${CLUSTER} "Dfam is" ${DFAM}
@@ -123,6 +130,7 @@ if [[ $RUNS -gt 0 ]]; then
   if [ -s ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} ]; then
     cat ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} >> ${DATA_DIR}/${RM_LIBRARY}
   fi
+  sed -i 's/ .*//' ${DATA_DIR}/${RM_LIBRARY}
 
 else
 
@@ -159,27 +167,18 @@ cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
 Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/ -p $PIECES
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
-Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --out ${DATA_DIR}/chimeras/ --rps_table ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
-#
-#
-# # # Classify improved consensi using RepeatModeler's RepeatClassifier
-# # echo "Reclassifying repeats"
-# # mkdir -p ${DATA_DIR}/classify/
-# # cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
-# # cd ${DATA_DIR}/classify/
-# # RepeatClassifier -pa {$THREADS} -consensi ${RM_LIBRARY}
-# # # Classify improved consensi using a method based on RepeatModeler's RepeatClassifier
-# # echo "Reclassifying repeats"
-# # mkdir -p ${DATA_DIR}/classify/split
-# # PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
-# # Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/classify/split/ -p $PIECES
-# # echo "BLASTN"
-# # parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt blastn -db data/RepeatMasker.lib -xdrop_ungap 500 -xdrop_gap_final 1000 -xdrop_gap 125 -min_raw_gapped_score 250 -dust no -gapopen 25 -gapextend 5 -word_size 7 -outfmt \"6 std qlen slen stitle\" -query ${DATA_DIR}/classify/split/{} -out ${DATA_DIR}/classify/split/{}.nt.out
-# # cat ${DATA_DIR}/classify/split/${RM_LIBRARY}*.nt.out > ${DATA_DIR}/classify/${RM_LIBRARY}.nt.out
-# # echo "BLASTX"
-# # parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt blastx -db data/RepeatPeps.lib -word_size 2 -outfmt \"6 std qlen slen stitle\" -query ${DATA_DIR}/classify/split/{} -out ${DATA_DIR}/classify/split/{}.aa.out
-# # cat ${DATA_DIR}/classify/split/${RM_LIBRARY}*.aa.out > ${DATA_DIR}/classify/${RM_LIBRARY}.aa.out
-# # echo "TRF"
-# # parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/classify/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/classify/split/{}.trf
-# # parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt python3 scripts/trf_parser.py --trf ${DATA_DIR}/classify/split/{}.trf --out ${DATA_DIR}/classify/split/{}.trf.tsv
-# # parallel --bar --jobs $THREADS -a ${DATA_DIR}/classify/split/${RM_LIBRARY}_split.txt cat ${DATA_DIR}/classify/split/{}.trf.tsv ">>" ${DATA_DIR}/classify/${RM_LIBRARY}.trf
+Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
+
+# Delete temp files
+rm -r ${DATA_DIR}/*/split/
+
+if [ "$CLASSIFY" == TRUE ]; then
+  # Classify improved consensi using RepeatModeler's RepeatClassifier
+  echo "Reclassifying repeats"
+  mkdir -p ${DATA_DIR}/classify/
+  cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
+  cd ${DATA_DIR}/classify/
+  RepeatClassifier -pa ${THREADS} -consensi ${RM_LIBRARY}
+  cd -
+  cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+fi

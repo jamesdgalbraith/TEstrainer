@@ -107,32 +107,3 @@ chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
 writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeric_", opt$in_seq))
 questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
 writeXStringSet(questionable_seq, paste0(opt$directory, "/questionable_", opt$in_seq))
-
-# truly_chimeric
-# 
-# false_positive_chimeric_normal_ranges <- false_positive_chimeric[false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
-#   mutate(start = ifelse(qstart < qend, qstart, qend),
-#          end = ifelse(qstart > qend, qstart, qend),
-#          strand = ifelse(qstart < qend, "+", "-")) %>%
-#   dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
-#   as_granges() %>%
-#   reduce_ranges_directed(ref = ref, abbrev = abbrev)
-# 
-# false_positive_chimeric_odd_ranges <- false_positive_chimeric[!false_positive_chimeric$ref %in% acceptable_domains$ref,] %>%
-#   mutate(start = ifelse(qstart < qend, qstart, qend),
-#          end = ifelse(qstart > qend, qstart, qend),
-#          strand = ifelse(qstart < qend, "+", "-")) %>%
-#   dplyr::select(seqnames, start, end, strand, ref, abbrev) %>%
-#   as_granges() %>%
-#   reduce_ranges_directed(ref = ref, abbrev = abbrev)
-# 
-# overlapping <- join_overlap_intersect(false_positive_chimeric_normal_ranges, false_positive_chimeric_odd_ranges) %>%
-#   as_tibble() %>%
-#   dplyr::select(-ref.x) %>%
-#   mutate(ref.y = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(ref.y))))),
-#          abbrev.x = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(abbrev.x))))),
-#          abbrev.y = sub(" ", "", sub("\\)", "", sub("c\\(", "", gsub('\\\"', '', as.character(abbrev.y))))),
-#          seqnames = as.character(seqnames)) %>%
-#   arrange(abbrev.y, abbrev.x)
-# 
-# View(overlapping)
