@@ -31,10 +31,12 @@ while getopts l:g:t:f:r:d:cCDh flag; do
   esac
 done
 
-# determine further variables
+# determine further variables and check files exist
+if [ ! -f ${RM_LIBRARY_PATH} ]; then echo "Library not found"; usage; fi
 if [ -z ${RM_LIBRARY_PATH} ]; then echo "Library must be supplied"; usage; else RM_LIBRARY=$(echo $RM_LIBRARY_PATH | sed 's/.*\///'); fi
 if [[ $RUNS -gt 0 ]]; then 
   if [ -z ${GENOME} ]; then echo "If refining genome must be supplied"; usage; fi
+  if [ ! -f ${GENOME} ]; then echo "Refining genome not found"; usage; fi
 fi
 if [ -z "$DATA_DIR" ]; then DATA_DIR=$(echo "TS_"${RM_LIBRARY}"_"${TIME}); fi
 
@@ -123,6 +125,7 @@ if [[ $RUNS -gt 0 ]]; then
       echo "ready for " $(( RUN_NO++ ))
     else
       echo Finished
+      break
     fi
 
   done
