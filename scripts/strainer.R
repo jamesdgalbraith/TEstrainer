@@ -102,8 +102,8 @@ no_domains_seq <- rm_seq_in[!names(rm_seq_in) %in% c(chimeric$seqnames, complete
 ## add step to combine data
 # write to file (check if any filtered, if not write all in to output)
 completely_acceptable_seq <- rm_seq_in[names(rm_seq_in) %in% compiled_acceptable$seqnames]
-writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directory, "/clean_", opt$in_seq))
+writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directory, "/chimerias/clean_", opt$in_seq))
 chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
-writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeric_", opt$in_seq))
+writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimerias/chimeric_", opt$in_seq))
 questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
-writeXStringSet(questionable_seq, paste0(opt$directory, "/questionable_", opt$in_seq))
+writeXStringSet(questionable_seq, paste0(opt$directory, "/chimerias/questionable_", opt$in_seq))
