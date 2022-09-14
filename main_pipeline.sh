@@ -174,6 +174,7 @@ Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chi
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
+cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
 
 # Delete temp files
 rm -r ${DATA_DIR}/*/split/
