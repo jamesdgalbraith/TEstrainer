@@ -184,7 +184,7 @@ if [ "$CLASSIFY" == TRUE ]; then
   mkdir -p ${DATA_DIR}/classify/
   cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
   cd ${DATA_DIR}/classify/
-  RepeatClassifier -pa ${THREADS} -consensi ${RM_LIBRARY}
+  RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
   cd -
   cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
 fi
