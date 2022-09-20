@@ -59,10 +59,8 @@ if [ "$DFAM" == TRUE ]; then Rscript scripts/Dfam_extractor.R -l ${RM_LIBRARY_PA
 # cluster and split step
 if [ "$CLUSTER" == TRUE ]; then
   cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o ${DATA_DIR}/run_0/further_${RM_LIBRARY} # cluster seq
-  PIECES="$(grep -c '>' ${DATA_DIR}/run_0/further_${RM_LIBRARY})"
 else
   cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
-  PIECES="$(grep -c '>' ${DATA_DIR}/run_0/further_${RM_LIBRARY})"
 fi
 
 # runs
@@ -82,7 +80,6 @@ if [[ $RUNS -gt 0 ]]; then
     # split
     mkdir -p ${DATA_DIR}/run_${RUN_NO}/raw ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete
     cp ${DATA_DIR}/run_$(expr $RUN_NO - 1)/further_${RM_LIBRARY} ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY}
-    PIECES=$(grep -c '>' ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY})
     echo "Splitting run "${RUN_NO}
     python scripts/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
 
@@ -150,7 +147,6 @@ fi
 # Identify simple repeats and satellites, trim ends of LINEs/SINEs
 echo "Splitting for simple/satellite packages"
 mkdir -p ${DATA_DIR}/trf/split
-PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
 python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/trf/split
 # Running TRF
 echo "Running TRF"
@@ -171,7 +167,6 @@ cp ${DATA_DIR}/trf/trimmed_${RM_LIBRARY} ${DATA_DIR}/${RM_LIBRARY}
 
 # Identify and trim chimeric elements, remove proteins
 mkdir -p ${DATA_DIR}/chimeras/split/
-PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
 cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
 python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
