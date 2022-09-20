@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import re
 from os.path import exists
 import sys
 import argparse
@@ -25,8 +26,9 @@ with open(args.in_seq, 'r') as handle:
         file_list.append(record.name.split(sep="#")[0]+".fasta")
         SeqIO.write(record, file_name, "fasta-2line")
 # write file list
-with open((args.out_dir+"/split_file_list.txt"), 'w') as fp:
+with open((args.out_dir+"/"+re.sub('.*/', '', in_seq)+"_split.txt"), 'w') as fp:
     for item in file_list:
         # write each item on a new line
         fp.write("%s\n" % item)
+
 
