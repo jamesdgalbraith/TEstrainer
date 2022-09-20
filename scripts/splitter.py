@@ -26,9 +26,7 @@ with open(args.in_seq, 'r') as handle:
         file_list.append(record.name.split(sep="#")[0]+".fasta")
         SeqIO.write(record, file_name, "fasta-2line")
 # write file list
-with open((args.out_dir+"/"+re.sub('.*/', '', in_seq)+"_split.txt"), 'w') as fp:
+with open((args.out_dir+"/"+re.sub('.*/', '', args.in_seq)+"_split.txt"), 'w') as fp:
     for item in file_list:
         # write each item on a new line
         fp.write("%s\n" % item)
-
-
