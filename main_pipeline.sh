@@ -72,6 +72,9 @@ if [[ $RUNS -gt 0 ]]; then
     makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
   fi
 
+  # create og reference
+  python scripts/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
+
   RUN_NO=1
   while  [ $RUN_NO -le $RUNS ]
   do
@@ -81,7 +84,7 @@ if [[ $RUNS -gt 0 ]]; then
     cp ${DATA_DIR}/run_$(expr $RUN_NO - 1)/further_${RM_LIBRARY} ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY}
     PIECES=$(grep -c '>' ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY})
     echo "Splitting run "${RUN_NO}
-    Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw -p $PIECES
+    python scripts/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
 
     # extend/align
     ## initial blast
@@ -148,7 +151,7 @@ fi
 echo "Splitting for simple/satellite packages"
 mkdir -p ${DATA_DIR}/trf/split
 PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
-Rscript scripts/splitter.R -f ${DATA_DIR}/${RM_LIBRARY} -p ${PIECES} -t DNA -o ${DATA_DIR}/trf/split -n
+python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/trf/split
 # Running TRF
 echo "Running TRF"
 parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/trf/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/trf/split/{}.trf
@@ -170,7 +173,7 @@ cp ${DATA_DIR}/trf/trimmed_${RM_LIBRARY} ${DATA_DIR}/${RM_LIBRARY}
 mkdir -p ${DATA_DIR}/chimeras/split/
 PIECES="$(grep -c '>' ${DATA_DIR}/${RM_LIBRARY})"
 cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
-Rscript scripts/splitter.R -t nt -f ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/ -p $PIECES
+python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
