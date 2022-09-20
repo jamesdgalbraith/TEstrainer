@@ -9,13 +9,13 @@ from Bio import SeqIO
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--in_seq', type=str, required=True,
                     help='Input multi-fasta to be split')
-parser.add_argument('-d', '--out_dir', type=str, required=True,
+parser.add_argument('-o', '--out_dir', type=str, required=True,
                     help='Output directory')                    
-
-if(exists(in_seq) == False):
-  sys.exit('File not found)
-if(exists(out_dir) == False):
-  os.mkdir(out_dir)
+args = parser.parse_args()
+if(exists(args.in_seq) == False):
+  sys.exit('File not found')
+if(exists(args.out_dir) == False):
+  os.mkdir(args.out_dir)
 file_list=[]
 
 # split fasta file
