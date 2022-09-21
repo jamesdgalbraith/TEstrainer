@@ -28,10 +28,12 @@ def file_check(file_name, debug):
     else:
       sys.exit((file_name+" not found"))
 
-file_check(args.directory, args.debug)
-file_check(args.genome, args.debug)
-file_check((args.directory+'/run_'+args.iteration+'/initial_seq/'+args.seq_name), args.debug)
+# check input files exist
 file_check((args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+".out"), args.debug)
+file_check((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), args.debug)
+file_check((args.directory+'/run_'+args.iteration+'/self_search/'), args.debug)
+file_check(args.genome, args.debug)
+
 
 import string
 from os import system
@@ -46,6 +48,8 @@ import pyranges as pr
 
 def size_check(var_name, size):
   if(len(var_name) < size):
+      with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
+        SeqIO.write(start_seq, o, "fasta-2line")
       exit()
 
 # read in starting seq
