@@ -92,7 +92,7 @@ if [[ $RUNS -gt 0 ]]; then
     # prepare for alignment
     mkdir -p ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align
     echo "Prepare for alignment "${RUN_NO}
-    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/self_queries.txt python3 scripts/self_blast_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME}
+    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/self_queries.txt python3 scripts/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME}
     
     ## align seqs
     ${DATA_DIR}/run_${RUN_NO}/mafft
