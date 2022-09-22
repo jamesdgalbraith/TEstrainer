@@ -86,8 +86,8 @@ def blast_to_bed(df):
   df.loc[rev, ['End']] = df.loc[rev, ['End']] +1
   return(df)
 
-# read in starting seq
-start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
+# perform initial blast
+system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1)
 
 # read in blast table and filter
 blast_df = pd.read_table((args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out'), names=['qseqid', 'Chromosome', 'pident', 'length', 'qstart', 'qend', 'qlen', 'Start', 'End', 'slen', 'evalue', 'bitscore', 'qcovs'])
@@ -148,6 +148,9 @@ df_to_fasta(correct_df, correct_df_path, False, True)
 system("blastn -task dc-megablast -query "+correct_df_path+" -subject "+correct_df_path+" -outfmt \"6 qseqid sseqid length pident qstart qend bitscore\" -out "+correct_df_path+".out")
 self_blast_df = pd.read_table((args.directory+"/run_"+args.iteration+"/self_search/"+args.seq_name+"_check_2.out"), names=['Chromosome', 'sseqid', 'length', 'pident', 'Start', 'End', 'bitscore'])
 size_check(self_blast_df, 3)
+
+# read in starting seq
+start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
 
 # fix coordinates
 self_blast_df.Start = self_blast_df.Start - 1

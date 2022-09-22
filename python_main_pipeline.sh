@@ -84,14 +84,9 @@ if [[ $RUNS -gt 0 ]]; then
     python scripts/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
 
     # extend/align
-    ## initial blast
-    mkdir -p ${DATA_DIR}/run_${RUN_NO}/initial_blast
-    echo "Initial blast "${RUN_NO}
-    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt blastn -task dc-megablast -query ${DATA_DIR}/run_${RUN_NO}/raw/{} -db $GENOME -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out ${DATA_DIR}/run_${RUN_NO}/initial_blast/{}.out -num_threads 1 # search genome
-    
-    # prepare for alignment
-    mkdir -p ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align ${DATA_DIR}/run_${RUN_NO}/mafft
-    echo "Prepare for alignment "${RUN_NO}
+    ## initial blast and prepare for alignment
+    mkdir -p ${DATA_DIR}/run_${RUN_NO}/initial_blast ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align ${DATA_DIR}/run_${RUN_NO}/mafft
+    echo "Initial blastInitial blast and preparation for MSA "${RUN_NO}
     parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 scripts/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME}
     
     ## align seqs
