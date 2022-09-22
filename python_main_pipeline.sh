@@ -90,7 +90,7 @@ if [[ $RUNS -gt 0 ]]; then
     parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt blastn -task dc-megablast -query ${DATA_DIR}/run_${RUN_NO}/raw/{} -db $GENOME -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out ${DATA_DIR}/run_${RUN_NO}/initial_blast/{}.out -num_threads 1 # search genome
     
     # prepare for alignment
-    mkdir -p ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align
+    mkdir -p ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align ${DATA_DIR}/run_${RUN_NO}/mafft
     echo "Prepare for alignment "${RUN_NO}
     parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/self_queries.txt python3 scripts/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME}
     
