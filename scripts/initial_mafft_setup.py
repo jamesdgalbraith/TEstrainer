@@ -30,7 +30,6 @@ def file_check(file_name, debug):
       sys.exit((file_name+" not found"))
 
 # check input files/folders exist
-file_check((args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+".out"), args.debug) # cirrent blast search
 file_check((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), args.debug) # current consensus
 file_check((args.directory+"/run_0/og/"+args.seq_name), args.debug) # og consensus
 file_check(args.genome, args.debug) # genome sequence
