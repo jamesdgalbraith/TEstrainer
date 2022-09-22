@@ -86,7 +86,7 @@ if [[ $RUNS -gt 0 ]]; then
     # extend/align
     ## initial blast and prepare for alignment
     mkdir -p ${DATA_DIR}/run_${RUN_NO}/initial_blast ${DATA_DIR}/run_${RUN_NO}/self_search ${DATA_DIR}/run_${RUN_NO}/to_align ${DATA_DIR}/run_${RUN_NO}/mafft
-    echo "Initial blastInitial blast and preparation for MSA "${RUN_NO}
+    echo "Initial blast and preparation for MSA "${RUN_NO}
     parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 scripts/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME}
     
     ## align seqs
