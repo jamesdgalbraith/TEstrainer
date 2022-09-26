@@ -41,7 +41,7 @@ acceptable_domains <- read_tsv("data/acceptable_domains.tsv", show_col_types = F
   rbind(additional_domains)
 
 if(file.size(opt$rps_table)==0){
-  writeXStringSet(rm_seq_in, paste0(opt$directory, "/clean_", opt$in_seq))
+  writeXStringSet(rm_seq_in, paste0(opt$directory, "/chimeras/clean_", opt$in_seq))
   quit()
 }
 
@@ -50,7 +50,7 @@ rps_blast_out <- read_tsv(file = opt$rps_table,
                                            col_names = c("seqnames", "qstart", "qend", "qlen", "sseqid", "sstart", "send", "slen",
                                                          "pident", "length", "mismatch", "gapopen", "evalue", "bitscore", "qcovs", "stitle"),
                                            show_col_types = FALSE) %>%
-                   tidyr::separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ")
+                   tidyr::separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ", extra = "drop")
 
 rps_blast_out <- rps_blast_out %>% dplyr::filter(length >= 0.5*slen)
 
@@ -102,8 +102,8 @@ no_domains_seq <- rm_seq_in[!names(rm_seq_in) %in% c(chimeric$seqnames, complete
 ## add step to combine data
 # write to file (check if any filtered, if not write all in to output)
 completely_acceptable_seq <- rm_seq_in[names(rm_seq_in) %in% compiled_acceptable$seqnames]
-writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directory, "/chimerias/clean_", opt$in_seq))
+writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directory, "/chimeras/clean_", opt$in_seq))
 chimeric_seq <- rm_seq_in[names(rm_seq_in) %in% seqnames(truly_chimeric_ranges)]
-writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimerias/chimeric_", opt$in_seq))
+writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeras/chimeric_", opt$in_seq))
 questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
-writeXStringSet(questionable_seq, paste0(opt$directory, "/chimerias/questionable_", opt$in_seq))
+writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/questionable_", opt$in_seq))
