@@ -88,6 +88,9 @@ def blast_to_bed(df):
 # perform initial blast
 system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
 
+if os.path.getsize(args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out') == 0:
+  sys.exit(("No hits found to"+args.seq_name))
+
 # read in starting seq
 start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
 
@@ -101,7 +104,7 @@ blast_to_bed(blast_df)
 
 # select 50 best, add flanks and convert to ranges
 blast_df = blast_df.sort_values(by = 'bitscore', ascending=False)
-blast_df = blast_df.iloc[:50]
+blast_df = blast_df.iloc[:args.no_seq]
 blast_df['Start'] = blast_df['Start'] - args.flank
 blast_df['End'] = blast_df['End'] + args.flank
 blast_df.loc[blast_df['Start'] < 1, 'Start'] = 0
