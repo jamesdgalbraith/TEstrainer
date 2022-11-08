@@ -163,6 +163,8 @@ Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA
 cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
 
 # Delete temp files
+rm -r ${DATA_DIR}/*/split/
+
 if [ "$CLASSIFY" == TRUE ]; then
   # Classify improved consensi using RepeatModeler's RepeatClassifier
   echo "Reclassifying repeats"
