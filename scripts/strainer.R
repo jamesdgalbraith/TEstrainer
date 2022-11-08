@@ -77,7 +77,7 @@ chimeric <- rps_blast_out %>%
   arrange(seqnames, qstart) %>%
   mutate(unacceptable = ifelse(ref %in% acceptable_domains$ref, "false", "true"))
 
-# Potentially mask out genic regions of chimeric repeats
+# Determine regions with acceptable domains overlapping "unacceptable"
 chimeric_ranges <- chimeric %>%
   dplyr::mutate(start = ifelse(qstart < qend, qstart, qend),
                 end = ifelse(qstart > qend, qstart, qend),

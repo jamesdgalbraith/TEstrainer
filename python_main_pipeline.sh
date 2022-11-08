@@ -54,7 +54,7 @@ echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT
 mkdir -p ${DATA_DIR}/run_0/ out/ ${DATA_DIR}/curated/
 
 # initial copy
-if [ "$DFAM" == TRUE ]; then Rscript scripts/Dfam_extractor.R -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
+if [ "$DFAM" == TRUE ]; then python scripts/Dfam_extractor.py -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
 
 # cluster and split step
 if [ "$CLUSTER" == TRUE ]; then
