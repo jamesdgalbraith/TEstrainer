@@ -25,6 +25,6 @@ if (is.null(opt$directory)) {
 
 suppressPackageStartupMessages(library(BSgenome))
 
-repeat_library <- readDNAStringSet(opt$library)
+repeat_library <- suppressMessages(readDNAStringSet(opt$library))
 suppressWarnings(repeat_library <- repeat_library[!is.na(as.integer(sub("#.*", "", sub("DR", "", names(repeat_library))))) & startsWith(names(repeat_library), "DR"),])
 writeXStringSet(repeat_library, paste0(opt$directory, "/", sub(".*/", "", opt$library)))
