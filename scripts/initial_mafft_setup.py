@@ -167,6 +167,7 @@ size_check(self_blast_df, 3)
 self_blast_df['q1'] = self_blast_df.groupby('Chromosome').Start.transform(lambda x: x.quantile(0.1))
 self_blast_df['q9'] = self_blast_df.groupby('Chromosome').End.transform(lambda x: x.quantile(0.9))
 self_blast_df = self_blast_df[(self_blast_df.Start.astype(float) >= self_blast_df.q1) & (self_blast_df.End.astype(float) <= self_blast_df.q9)].copy()
+size_check(self_blast_df, 3)
 
 # create and reduce/merge ranges
 self_blast_gr = pr.from_dict({"Chromosome": self_blast_df.Chromosome, "Start": self_blast_df.Start, "End": self_blast_df.End})
