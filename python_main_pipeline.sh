@@ -157,7 +157,7 @@ cp ${DATA_DIR}/trf/trimmed_${RM_LIBRARY} ${DATA_DIR}/${RM_LIBRARY}
 mkdir -p ${DATA_DIR}/chimeras/split/
 cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
 python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
-parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db /media/projectDrive_1/databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
+parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
 cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
@@ -165,13 +165,13 @@ cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_
 # Delete temp files
 rm -r ${DATA_DIR}/*/split/
 
-if [ "$CLASSIFY" == TRUE ]; then
-  # Classify improved consensi using RepeatModeler's RepeatClassifier
-  echo "Reclassifying repeats"
-  mkdir -p ${DATA_DIR}/classify/
-  cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
-  cd ${DATA_DIR}/classify/
-  RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
-  cd -
-  cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
-fi
+# if [ "$CLASSIFY" == TRUE ]; then
+#   # Classify improved consensi using RepeatModeler's RepeatClassifier
+#   echo "Reclassifying repeats"
+#   mkdir -p ${DATA_DIR}/classify/
+#   cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
+#   cd ${DATA_DIR}/classify/
+#   RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
+#   cd -
+#   cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+# fi
