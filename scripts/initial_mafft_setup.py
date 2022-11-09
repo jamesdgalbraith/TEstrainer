@@ -89,11 +89,14 @@ def blast_to_bed(df):
 # perform initial blast
 system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
 
-if os.path.getsize(args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out') == 0:
-  sys.exit()
-
 # read in starting seq
 start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
+
+# check if any hits found, if not write to file and exit
+if os.path.getsize(args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out') == 0:
+  with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
+        SeqIO.write(start_seq, o, "fasta-2line")
+  sys.exit()
 
 # read in blast table and filter
 blast_df = pd.read_table((args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out'), names=['qseqid', 'Chromosome', 'pident', 'length', 'qstart', 'qend', 'qlen', 'Start', 'End', 'slen', 'evalue', 'bitscore', 'qcovs'])
