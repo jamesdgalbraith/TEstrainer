@@ -25,11 +25,12 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(plyranges))
 suppressPackageStartupMessages(library(BSgenome))
 
+# read in library and make bed like table
 in_seq <- readDNAStringSet(opt$in_seq)
 in_seq_tbl <- tibble(seqnames = names(in_seq), og_width = width(in_seq)) %>%
   dplyr::mutate(draft_seqnames = sub("#.*", "", seqnames))
 
-# read in and rearrange SA-SSR data
+# read in, rearrange and calculate percent tandem repeats for SA-SSR data
 sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"),
                   col_names = c("seqnames", "ssr", "count", "start"), skip = 1, show_col_types = F) %>%
   dplyr::mutate(period = as.double(width(ssr))) %>%
@@ -50,7 +51,7 @@ sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
   dplyr::select(seqnames, sassr_perc_tr) %>%
   base::unique()
 
-# read in and rearrange TRF data
+# read in, rearrange and calculate percent tandem repeats for TRF data
 trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
                 col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F) %>%
   mutate(draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
@@ -72,7 +73,7 @@ trf_calc <- as_tibble(reduce(as_granges(trf_select))) %>%
   dplyr::select(seqnames, trf_perc_tr) %>%
   base::unique()
 
-# read in and rearrange MREPS data
+# read in, rearrange and calculate percent tandem repeats for MREPS data
 mreps <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps"),
                   col_names = c("draft_seqnames", "start", "end", "ssr_width", "period", "count", "error", "sequence"), show_col_types = F) %>%
   mutate(ssr = substr(x = sequence, start = 0, stop = period)) %>%
@@ -128,7 +129,7 @@ macrosatellites <- satellites %>%
          end = start + period) %>%
   as_granges()
 macrosatellites_seq <- getSeq(in_seq, macrosatellites)
-names(macrosatellites_seq) <- seqnames(macrosatellites)
+names(macrosatellites_seq) <- sub("#.*", "#Satellite", seqnames(macrosatellites))
 writeXStringSet(macrosatellites_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".macrosatellites"))
 
 # leave micro to minisatellite repeats intact
@@ -137,7 +138,7 @@ other_satellites <- satellites %>%
   dplyr::mutate(start = 1, end = og_width) %>%
   as_granges()
 other_satellites_seq <- getSeq(in_seq, other_satellites)
-names(other_satellites_seq) <- seqnames(other_satellites)
+names(other_satellites_seq) <- sub("#.*", "#Satellite", seqnames(other_satellites))
 writeXStringSet(other_satellites_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".satellites"))
 
 # filtering for trimming
