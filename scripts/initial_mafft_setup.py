@@ -14,7 +14,7 @@ parser.add_argument('-s', '--seq_name', type=str, required=True,
                     help='Sequence being prepared for alignment')
 parser.add_argument('-g', '--genome', type=str, required=True,
                     help='Path to genome sequence')
-parser.add_argument('-f', '--flank', type=int, default=1500,
+parser.add_argument('-f', '--flank', type=int, default=1000,
                     help='Length of flank to be extended')
 parser.add_argument('-n', '--no_seq', type=int, default=20,
                     help='Number of sequences to use for alignment')
@@ -90,7 +90,7 @@ def blast_to_bed(df):
 system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
 
 if os.path.getsize(args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out') == 0:
-  sys.exit(("No hits found to"+args.seq_name))
+  sys.exit()
 
 # read in starting seq
 start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
