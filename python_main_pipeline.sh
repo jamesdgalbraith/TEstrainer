@@ -3,7 +3,7 @@
 usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads] [-f Flank ] [-r Runs] [-c Set if clustering ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
 
 # default values
-FLANK=1500
+FLANK=1000
 THREADS=4
 RUNS=0
 CLUSTER=FALSE
