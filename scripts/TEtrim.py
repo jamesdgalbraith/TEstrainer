@@ -22,7 +22,7 @@ parser.add_argument('-d', '--directory', type=str, required=True,
 parser.add_argument('-t', '--threads', type=str,
                     help='Threads to use', default=1)
 parser.add_argument('-f', '--flank', type=int,
-                    help='Length of flanks used', default=1500)
+                    help='Length of flanks used', default=1000)
 parser.add_argument('-D', '--debug', type=str,
                     help='Print debug messages', default='FALSE')
 parser.add_argument('-w', '--window', type=int,
