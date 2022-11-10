@@ -145,6 +145,7 @@ fi
 echo "Splitting for simple/satellite packages"
 mkdir -p ${DATA_DIR}/trf/split
 python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/trf/split
+cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/trf/
 # Run and parse TRF
 echo "Running TRF"
 parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/trf/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/trf/split/{}.trf
