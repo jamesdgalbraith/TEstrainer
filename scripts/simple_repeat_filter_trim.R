@@ -8,7 +8,7 @@ option_list <- list(
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
-opt <- list()
+
 # check variables provided
 if(is.na(opt$in_seq)){
   stop("Path to in sequence must be supplied")
@@ -186,7 +186,7 @@ names(trimmed_seq) <- seqnames(to_trim)
 untouched_seq <- in_seq[!sub("#.*", "", names(in_seq)) %in%
                           c(sub("#.*", "", names(names(trimmed_seq))),
                             sub("#.*", "", names(names(macrosatellites_seq))),
-                            sub("#.*", "", names(names(other_satellites_seq)))))]
+                            sub("#.*", "", names(names(other_satellites_seq))))]
 
 # combine untouched and trimmed sequences and write to file
 writeXStringSet(c(trimmed_seq, untouched_seq), paste0(opt$directory, "/trf/", opt$out_seq, ".nonsatellite"))
