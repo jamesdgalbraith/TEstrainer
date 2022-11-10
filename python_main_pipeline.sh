@@ -184,9 +184,9 @@ if [ "$CLASSIFY" == TRUE ]; then
   mkdir -p ${DATA_DIR}/classify/
   cp ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
   cd ${DATA_DIR}/classify/
-  RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
+  RepeatClassifier -debug -pa ${THREADS} -consensi ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite
   cd -
-  cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+  cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}
   echo "Compiling library"
   cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
 else
