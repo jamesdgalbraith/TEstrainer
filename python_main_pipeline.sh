@@ -155,7 +155,7 @@ echo "Running SA-SSR"
 sa-ssr -e -l 20 -L 50000 -m 1 -M 5000 -t ${THREADS} ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/trf/${RM_LIBRARY}.sassr
 # Run and compile mreps
 echo "Running mreps"
-parallel --silent --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt bash scripts/mreps_parser.sh -i ${DATA_DIR}/trf/split/{}
+parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt bash scripts/mreps_parser.sh -i ${DATA_DIR}/trf/split/{} "2>"/dev/null
 find ./${DATA_DIR}/trf/split/ -type f -name "*mreps" -exec cat {} + | cat > ${DATA_DIR}/trf/${RM_LIBRARY}.mreps
 # Interpret mreps, TRF and SA-SSR
 echo "Trimming and sorting based on mreps, TRF, SA-SSR"
@@ -188,10 +188,10 @@ if [ "$CLASSIFY" == TRUE ]; then
   cd -
   cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}
   echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
 else
   echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
 fi
 
 # Sort? (for RepeatModeler output)
