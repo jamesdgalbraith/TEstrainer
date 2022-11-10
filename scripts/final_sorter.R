@@ -5,7 +5,7 @@ library(optparse)
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Input sequence (required)")
 )
-
+opt <- parse_args(OptionParser(option_list=option_list))
 if(is.na(opt$in_seq)){
   stop("Path to in sequence must be supplied")
 }

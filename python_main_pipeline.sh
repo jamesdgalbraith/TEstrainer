@@ -175,7 +175,7 @@ cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_
 # Delete temp files
 echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
-find TS_monarch.consensi.fa.classified_4887/run_*/ -mindepth 1 -type d -exec rm -rv {} +
+find ${DATA_DIR}/run_*/ -mindepth 1 -type d -exec rm -rv {} +
 
 # Classify ?
 if [ "$CLASSIFY" == TRUE ]; then
