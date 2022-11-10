@@ -1,20 +1,21 @@
 #!/bin/bash
 
-usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads] [-f Flank ] [-r Runs] [-c Set if clustering ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
+usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads] [-f Flank ] [-r Runs] [-d Out data directory ] [-c Set if clustering ] [-C Set if reclassifying ] [-s Set if sorting (only for RepeatModeler output) ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
 
 # default values
 FLANK=1000
 THREADS=4
 RUNS=0
 CLUSTER=FALSE
-DFAM=FALSE
 CLASSIFY=FALSE
+SORT=FALSE
+DFAM=FALSE
 # for potential folder name
 TIME=$(date +"%s")
 TIME=${TIME: -4}
 
 # parsing
-while getopts l:g:t:f:r:d:cCDh flag; do
+while getopts l:g:t:f:r:d:cCsDh flag; do
   case "${flag}" in
     l) RM_LIBRARY_PATH=${OPTARG};;
     g) GENOME=${OPTARG};;
@@ -24,6 +25,7 @@ while getopts l:g:t:f:r:d:cCDh flag; do
     d) DATA_DIR=${OPTARG};;
     c) CLUSTER=TRUE ;;
     C) CLASSIFY=TRUE;;
+    s) SORT=TRUE
     D) DFAM=TRUE ;;
     h | *)
       print_usage
@@ -158,28 +160,36 @@ find ./${DATA_DIR}/trf/split/ -type f -name "*mreps" -exec cat {} + | cat > ${DA
 # Interpret mreps, TRF and SA-SSR
 echo "Trimming and sorting based on mreps, TRF, SA-SSR"
 Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DATA_DIR}
-cp ${DATA_DIR}/trf/trimmed_${RM_LIBRARY} ${DATA_DIR}/${RM_LIBRARY}
 
-# Identify and trim chimeric elements, remove proteins
+# Identify and trim chimeric repeats from non-satellite repeats, remove proteins
 mkdir -p ${DATA_DIR}/chimeras/split/
-cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
-python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
+cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
+python scripts/splitter.py -i ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
 parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
-cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
+cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite
 
 # Delete temp files
 rm -r ${DATA_DIR}/*/split/
 find TS_monarch.consensi.fa.classified_4887/run_*/ -mindepth 1 -type d -exec rm -rv {} +
 
-# if [ "$CLASSIFY" == TRUE ]; then
-#   # Classify improved consensi using RepeatModeler's RepeatClassifier
-#   echo "Reclassifying repeats"
-#   mkdir -p ${DATA_DIR}/classify/
-#   cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/classify/
-#   cd ${DATA_DIR}/classify/
-#   RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
-#   cd -
-#   cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
-# fi
+# Classify ?
+if [ "$CLASSIFY" == TRUE ]; then
+  # Classify improved consensi using RepeatModeler's RepeatClassifier
+  echo "Reclassifying repeats"
+  mkdir -p ${DATA_DIR}/classify/
+  cp ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
+  cd ${DATA_DIR}/classify/
+  RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
+  cd -
+  cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
+else
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
+fi
+
+# Sort? (for RepeatModeler output)
+if [ "$SORT" == TRUE ]; then
+  Rscript scripts/final_sorter.R -i ${DATA_DIR}/${RM_LIBRARY}
+fi
