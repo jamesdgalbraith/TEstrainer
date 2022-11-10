@@ -4,8 +4,7 @@ library(optparse)
 
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Input sequence (required)"),
-  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character"),
-  make_option(c("-s", "--sort"), type="logical", default=FALSE, help="Set to sort final output")
+  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
@@ -130,7 +129,6 @@ macrosatellites <- satellites %>%
   as_granges()
 macrosatellites_seq <- getSeq(in_seq, macrosatellites)
 names(macrosatellites_seq) <- sub("#.*", "#Satellite", seqnames(macrosatellites))
-writeXStringSet(macrosatellites_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".macrosatellites"))
 
 # leave micro to minisatellite repeats intact
 other_satellites <- satellites %>%
@@ -139,7 +137,9 @@ other_satellites <- satellites %>%
   as_granges()
 other_satellites_seq <- getSeq(in_seq, other_satellites)
 names(other_satellites_seq) <- sub("#.*", "#Satellite", seqnames(other_satellites))
-writeXStringSet(other_satellites_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".satellites"))
+
+# Combine satellite repeats and write to file
+writeXStringSet(c(other_satellites_seq, macrosatellites_seq), paste0(opt$directory, "/trf/", opt$out_seq, ".satellites"))
 
 # filtering for trimming
 trim_3 <- compiled_tr %>%
@@ -181,30 +181,9 @@ trim_only_3 <- trim_3[!trim_3$seqnames %in% trim_5$seqnames,] %>%
 to_trim <- as_granges(rbind(trim_both, rbind(trim_only_5, trim_only_3)))
 trimmed_seq <- getSeq(in_seq, to_trim)
 names(trimmed_seq) <- seqnames(to_trim)
-writeXStringSet(trimmed_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".trimmed"))
 
 # determine untouched sequences
 untouched_seq <- in_seq[!names(in_seq) %in% c(names(trimmed_seq), names(macrosatellites_seq), names(other_satellites_seq))]
-writeXStringSet(untouched_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".nonsatellite"))
 
-# put it all together
-compiled_fixed_seq <- c(macrosatellites_seq, other_satellites_seq, trimmed_seq, untouched_seq)
-
-if(opt$sort == TRUE){
-  
-  compiled_fixed_sorted <- tibble(seqnames = names(compiled_fixed_seq), start = 1, end = width(compiled_fixed_seq),
-         numbering = sub(".*rnd-", "", sub("#.*", "", names(compiled_fixed_seq)))) %>%
-    mutate(round = as.integer(sub("_.*", "", numbering)), family = as.integer(sub(".*-", "", numbering))) %>%
-    arrange(round, family, seqnames) %>%
-    as_granges()
-  compiled_fixed_sorted_seq <- getSeq(compiled_fixed_seq, compiled_fixed_sorted)
-  names(compiled_fixed_sorted_seq) <- seqnames(compiled_fixed_sorted)
-  
-  # write all corrected sequences
-  writeXStringSet(compiled_fixed_sorted_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))
-  
-} else {
-
-  writeXStringSet(compiled_fixed_seq, paste0(opt$directory, "/trf/trimmed_", opt$out_seq))  
-  
-}
+# combine untouched and trimmed sequences and write to file
+writeXStringSet(c(trimmed_seq, untouched_seq), paste0(opt$directory, "/trf/", opt$out_seq, ".nonsatellite"))
