@@ -25,7 +25,7 @@ while getopts l:g:t:f:r:d:cCsDh flag; do
     d) DATA_DIR=${OPTARG};;
     c) CLUSTER=TRUE ;;
     C) CLASSIFY=TRUE;;
-    s) SORT=TRUE
+    s) SORT=TRUE ;;
     D) DFAM=TRUE ;;
     h | *)
       print_usage
