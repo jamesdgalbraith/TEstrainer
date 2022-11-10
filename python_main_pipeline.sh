@@ -164,13 +164,16 @@ Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DA
 # Identify and trim chimeric repeats from non-satellite repeats, remove proteins
 mkdir -p ${DATA_DIR}/chimeras/split/
 cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY}
+echo "Split ready for rpstblastn"
 python scripts/splitter.py -i ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
-parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
+parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/prestrain_${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
+echo "Running strainer.R"
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/${RM_LIBRARY} --directory ${DATA_DIR}
 cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite
 
 # Delete temp files
+echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
 find TS_monarch.consensi.fa.classified_4887/run_*/ -mindepth 1 -type d -exec rm -rv {} +
 
@@ -184,12 +187,15 @@ if [ "$CLASSIFY" == TRUE ]; then
   RepeatClassifier -debug -pa ${THREADS} -consensi ${RM_LIBRARY}
   cd -
   cp ${DATA_DIR}/classify/${RM_LIBRARY}.classified ${DATA_DIR}/${RM_LIBRARY}
+  echo "Compiling library"
   cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
 else
+  echo "Compiling library"
   cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellite >> ${DATA_DIR}/${RM_LIBRARY}
 fi
 
 # Sort? (for RepeatModeler output)
 if [ "$SORT" == TRUE ]; then
+  echo "Sorting library"
   Rscript scripts/final_sorter.R -i ${DATA_DIR}/${RM_LIBRARY}
 fi
