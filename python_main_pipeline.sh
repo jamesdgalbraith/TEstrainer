@@ -53,7 +53,7 @@ if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_T
 echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS "Cluster is" ${CLUSTER} "Dfam is" ${DFAM}
 
 # make directories
-mkdir -p ${DATA_DIR}/run_0/ out/ ${DATA_DIR}/curated/
+mkdir -p ${DATA_DIR}/run_0/
 
 # initial copy
 if [ "$DFAM" == TRUE ]; then python scripts/Dfam_extractor.py -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
@@ -175,7 +175,7 @@ cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_
 # Delete temp files
 echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
-find ${DATA_DIR}/run_*/ -mindepth 1 -type d -exec rm -rv {} +
+find ${DATA_DIR}/ -mindepth 1 -name "run_*" -exec rm -r {} +
 
 # Classify ?
 if [ "$CLASSIFY" == TRUE ]; then
