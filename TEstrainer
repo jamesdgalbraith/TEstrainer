@@ -166,8 +166,8 @@ Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DA
 mkdir -p ${DATA_DIR}/chimeras/split/
 cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/chimeras/${RM_LIBRARY}
 echo "Split ready for rpstblastn"
-python scripts/splitter.py -i ${DATA_DIR}/chimeras/prestrain_${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
-parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/prestrain_${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
+python scripts/splitter.py -i ${DATA_DIR}/chimeras/${RM_LIBRARY} -o ${DATA_DIR}/chimeras/split/
+parallel --bar --jobs $THREADS -a ${DATA_DIR}/chimeras/split/${RM_LIBRARY}_split.txt rpstblastn -query ${DATA_DIR}/chimeras/split/{} -db ~/Databases/cdd/Cdd -out ${DATA_DIR}/chimeras/split/{}.out -outfmt \"6 qseqid qstart qend qlen sseqid sstart send slen pident length mismatch gapopen evalue bitscore qcovs stitle\" -evalue 0.01 -num_threads 1
 find ./${DATA_DIR}/chimeras/split/ -type f -name "*.out" -exec cat {} + | cat > ${DATA_DIR}/chimeras/${RM_LIBRARY}.rps.out
 echo "Running strainer.R"
 Rscript scripts/strainer.R --in_seq ${DATA_DIR}/chimeras/${RM_LIBRARY} --directory ${DATA_DIR}
