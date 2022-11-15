@@ -48,7 +48,7 @@ if(file.size(opt$rps_table)==0){
 
 # read rps blast out
 rps_blast_out <- read_tsv(file = opt$rps_table,
-                                           col_names = c("seqnames", "start", "end", "qlen", "sseqid", "sstart", "send", "slen",
+                                           col_names = c("seqnames", "qstart", "qend", "qlen", "sseqid", "sstart", "send", "slen",
                                                          "pident", "length", "mismatch", "gapopen", "evalue", "bitscore", "qcovs", "stitle"),
                                            show_col_types = FALSE) %>%
                    tidyr::separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ", extra = "drop")
@@ -117,7 +117,7 @@ writeXStringSet(c(completely_acceptable_seq, no_domains_seq), paste0(opt$directo
 # in writing to file flip if appropriate
 if(nrow(truly_chimeric) > 0){
   
-  truly_chimeric <- truly_chimeric %>%
+  truly_chimeric_ranges <- truly_chimeric %>%
     dplyr::mutate(strand = ifelse(qstart < qend, "+", "-"), start = 1, end = qlen) %>%
     dplyr::group_by(seqnames) %>%
     dplyr::arrange(-bitscore) %>%
@@ -125,15 +125,15 @@ if(nrow(truly_chimeric) > 0){
     dplyr::ungroup() %>%
     plyranges::as_granges()
   
-  chimeric_seq <- getSeq(rm_seq_in, truly_chimeric)
-  names(chimeric_seq) <- seqnames(truly_chimeric)
+  chimeric_seq <- getSeq(rm_seq_in, truly_chimeric_ranges)
+  names(chimeric_seq) <- seqnames(truly_chimeric_ranges)
   writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeras/chimeric_", opt$out_seq))
 
 }
 
-if(nrow(truly_chimeric) > 0){
+if(nrow(questionable) > 0){
   
-  truly_chimeric <- truly_chimeric %>%
+  questionable_ranges <- questionable %>%
     dplyr::mutate(strand = ifelse(qstart < qend, "+", "-"), start = 1, end = qlen) %>%
     dplyr::group_by(seqnames) %>%
     dplyr::arrange(-bitscore) %>%
@@ -141,11 +141,8 @@ if(nrow(truly_chimeric) > 0){
     dplyr::ungroup() %>%
     plyranges::as_granges()
   
-  chimeric_seq <- getSeq(rm_seq_in, truly_chimeric)
-  names(chimeric_seq) <- seqnames(truly_chimeric)
-  writeXStringSet(chimeric_seq, paste0(opt$directory, "/chimeras/chimeric_", opt$out_seq))
+  questionable_seq <- getSeq(rm_seq_in, questionable_ranges)
+  names(questionable_seq) <- seqnames(questionable_ranges)
+  writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/chimeric_", opt$out_seq))
   
 }
-
-questionable_seq <- rm_seq_in[names(rm_seq_in) %in% questionable$seqnames]
-writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/questionable_", opt$out_seq))
