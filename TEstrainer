@@ -193,7 +193,7 @@ if [ "$CLASSIFY" == TRUE ]; then
   cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
 else
   echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
 fi
 
 # Sort? (for RepeatModeler output)
