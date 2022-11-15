@@ -1,5 +1,6 @@
 ref	abbrev	organism	families
 pfam17489	Tnp_22_trimer	Ceratotherium_simum_cottoni	LINE/L1
+cd16097	IgV_SIRP	Ceratotherium_simum_cottoni	LTR/ERV1
 pfam08333	DUF1725	Arctocephalus_gazella	LINE/L1
 pfam12259	Baculo_F	Myzus_persicae	LTR/Gypsy,DNA/Kobolok-E
 pfam04500	FLYWCH	Myzus_persicae	DNA/MuDR
