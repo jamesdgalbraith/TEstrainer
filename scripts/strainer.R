@@ -40,6 +40,7 @@ additional_domains <- read_tsv("data/additional_domains.tsv", show_col_types = F
   dplyr::select(ref, abbrev)
 acceptable_domains <- read_tsv("data/acceptable_domains.tsv", show_col_types = FALSE) %>%
   rbind(additional_domains)
+unacceptable_domains <- read_tsv("data/unacceptable_domains.tsv", show_col_types = FALSE)
 
 if(file.size(opt$rps_table)==0){
   writeXStringSet(rm_seq_in, paste0(opt$directory, "/chimeras/clean_", opt$out_seq))
@@ -95,6 +96,17 @@ truly_chimeric_ranges <- filter_by_non_overlaps(chimeric_ranges_unacceptable_tru
 truly_chimeric <- chimeric[chimeric$seqnames %in% seqnames(truly_chimeric_ranges),]
 false_positive_chimeric <- chimeric[!chimeric$seqnames %in% seqnames(truly_chimeric_ranges),] %>%
   dplyr::select(-unacceptable)
+
+# remove repeats unacceptable domains
+unacceptable_chimeric <- truly_chimeric %>%
+  filter(ref %in% unacceptable_domains$ref)
+unacceptable_chimeric <- truly_chimeric %>%
+  filter(seqnames %in% unacceptable_chimeric$seqnames) %>%
+  dplyr::select(-unacceptable)
+questionable <- rbind(questionable, unacceptable_chimeric)
+
+truly_chimeric <- truly_chimeric %>%
+  filter(!seqnames %in% unacceptable_chimeric$seqnames)
 
 # flip if domain with highest bitscore is in reverse strand
 compiled_acceptable <- rbind(completely_acceptable, false_positive_chimeric) %>%
