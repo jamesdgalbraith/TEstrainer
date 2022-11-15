@@ -143,6 +143,6 @@ if(nrow(questionable) > 0){
   
   questionable_seq <- getSeq(rm_seq_in, questionable_ranges)
   names(questionable_seq) <- seqnames(questionable_ranges)
-  writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/chimeric_", opt$out_seq))
+  writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/questionable_", opt$out_seq))
   
 }
