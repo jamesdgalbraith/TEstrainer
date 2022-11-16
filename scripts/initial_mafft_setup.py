@@ -110,7 +110,7 @@ if trf_pr.length/te_len > 0.9:
     SeqIO.write(start_seq, o, "fasta-2line")
   exit()
 # TEs >50% consider TEs needing trimming
-elif trf_pr.length/te_len > 0.5:
+elif (trf_pr.length/te_len > 0.5) & (len(start_seq.seq) > 500):
   if args.debug is True:
       print('Whoa boy, '+start_seq.name+' is inside tandem repeat')
   # make pr object of whole repeat
