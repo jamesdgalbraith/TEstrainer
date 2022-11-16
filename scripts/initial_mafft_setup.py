@@ -89,18 +89,46 @@ def blast_to_bed(df):
 # read in starting seq
 start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
 
-# check if sequence is tandem repeat
+# check if sequence is largely tandem repeat
+# make pd.df to use as holder for trf coordinates
+te_len=len(start_seq.seq)
+trf_df = pd.DataFrame(columns=['Chromosome', 'Start', 'End'])
 with open((args.directory+'/run_'+args.iteration+'/raw/'+args.seq_name+'.trf'), 'r') as trf:
   for line in trf:
-    splitline = line.split()
-    if line.startswith("@") is False:
-      # check if > 80% of sequence is satllite
-      if((int(splitline[1])-int(splitline[0]))/len(start_seq.seq) > 0.9) and float(splitline[3]) >=5:
-        if args.debug is True:
-          print('Hold your horses, '+start_seq.name+' is a satellite')
-        with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
-          SeqIO.write(start_seq, o, "fasta-2line")
-        exit()
+    if line.startswith('@'):
+      seqnames = re.sub('@', '', line.split()[0])
+    elif float(line.split()[3]) > 3:
+      trf_df = pd.concat([trf_df, pd.DataFrame({'Chromosome':[seqnames], 'Start':[int(line.split()[0])], 'End':[int(line.split()[1])]})])
+# Merge trf pr
+trf_pr=pr.PyRanges(df=trf_df).merge()
+# Calculate total length of satellite sequences
+# TEs >90% consider satellites
+if trf_pr.length/te_len > 0.9:
+  with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
+    if args.debug is True:
+      print('Hold your horses, '+start_seq.name+' is likely a tandem repeat')
+    SeqIO.write(start_seq, o, "fasta-2line")
+  exit()
+# TEs >50% consider TEs needing trimming
+elif trf_pr.length/te_len > 0.5:
+  if args.debug is True:
+      print('Whoa boy, '+start_seq.name+' is inside tandem repeat')
+  # make pr object of whole repeat
+  te_pr=pr.from_dict({'Chromosome': [seqnames], 'Start': [0], 'End': [te_len]})
+  # get inverse or trf, i.e. non tandem repeat section
+  trf_inverse_pr=te_pr.subtract(trf_pr)
+  # convert to df
+  trf_inverse_df=trf_inverse_pr.as_df()
+  # calculate width
+  trf_inverse_df['Width']=trf_inverse_df.End-trf_inverse_df.Start+1
+  # select longest non TR section and convert to ranges
+  non_trf_longest_df=trf_inverse_df[trf_inverse_df.Width==max(trf_inverse_df.Width)].head(n=1)
+  non_trf_longest_pr=pr.PyRanges(df=non_trf_longest_df)
+  # get sequence of non TR section, write to file
+  non_trf_seq=SeqRecord(seq=Seq(str(start_seq.seq)[int(non_trf_longest_df['Start']):int(non_trf_longest_df['End'])]), id=start_seq.id, name=start_seq.name)
+  with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
+    SeqIO.write(non_trf_seq, o, "fasta-2line")
+  exit()
 
 # perform initial blast
 system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
