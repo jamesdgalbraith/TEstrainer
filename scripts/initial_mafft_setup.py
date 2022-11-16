@@ -86,11 +86,24 @@ def blast_to_bed(df):
   df.loc[rev, ['End']] = df.loc[rev, ['End']] +1
   return(df)
 
-# perform initial blast
-system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
-
 # read in starting seq
 start_seq = SeqIO.read((args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name), "fasta")
+
+# check if sequence is tandem repeat
+with open((args.directory+'/run_'+args.iteration+'/raw/'+args.seq_name+'.trf'), 'r') as trf:
+  for line in trf:
+    splitline = line.split()
+    if line.startswith("@") is False:
+      # check if > 80% of sequence is satllite
+      if((int(splitline[1])-int(splitline[0]))/len(start_seq.seq) > 0.9) and float(splitline[3]) >=5:
+        if args.debug is True:
+          print('Hold your horses, '+start_seq.name+' is a satellite')
+        with open((args.directory+'/run_'+args.iteration+'/TEtrim_complete/'+args.seq_name), "w") as o:
+          SeqIO.write(start_seq, o, "fasta-2line")
+        exit()
+
+# perform initial blast
+system("blastn -task dc-megablast -query "+args.directory+"/run_"+args.iteration+"/raw/"+args.seq_name+" -db "+args.genome+" -evalue 1e-5 -outfmt \"6 qseqid sseqid pident length qstart qend qlen sstart send slen evalue bitscore qcovs\" -out "+args.directory+"/run_"+args.iteration+"/initial_blast/"+args.seq_name+".out -num_threads 1")
 
 # check if any hits found, if not write to file and exit
 if os.path.getsize(args.directory+'/run_'+args.iteration+'/initial_blast/'+args.seq_name+'.out') == 0:
