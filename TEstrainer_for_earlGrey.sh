@@ -12,7 +12,7 @@ TIME=$(date +"%s")
 TIME=${TIME: -4}
 
 # parsing
-while getopts l:g:t:f:r:d:cCsDh flag; do
+while getopts l:g:t:f:d:h flag; do
   case "${flag}" in
     l) RM_LIBRARY_PATH=${OPTARG};;
     g) GENOME=${OPTARG};;
