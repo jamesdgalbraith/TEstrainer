@@ -161,8 +161,8 @@ echo "Reclassifying repeats"
 mkdir -p ${DATA_DIR}/classify/
 cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
 cd ${DATA_DIR}/classify/
-RepeatClassifier -pa ${THREADS} -consensi rinsed_${RM_LIBRARY}.nonsatellite
+RepeatClassifier -pa ${THREADS} -consensi ${RM_LIBRARY}.nonsatellite
 cd -
-cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
+cp ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
 echo "Compiling library"
 cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
