@@ -1,14 +1,12 @@
 #!/bin/bash
 
-usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-r Iterations of BEET to run (default 0) ] [-d Out directory, if not specified wil be created ] [-c Set if clustering ] [-C Set if reclassifying ] [-s Set if sorting (only for RepeatModeler output) ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
+usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-d Out directory, if not specified wil be created ] [-h Print this help]" 1>&2; exit 1; }
 
 # default values
 STRAIN_SCRIPTS=INSERT_FILENAME_HERE
 FLANK=1000
 THREADS=4
-RUNS=0
-CLUSTER=FALSE
-CLASSIFY=FALSE
+RUNS=10
 # for potential folder name
 TIME=$(date +"%s")
 TIME=${TIME: -4}
@@ -20,10 +18,7 @@ while getopts l:g:t:f:r:d:cCsDh flag; do
     g) GENOME=${OPTARG};;
     t) THREADS=${OPTARG};;
     f) FLANK=${OPTARG};;
-    r) RUNS=${OPTARG};;
     d) DATA_DIR=${OPTARG};;
-    c) CLUSTER=TRUE ;;
-    C) CLASSIFY=TRUE;;
     h | *)
       print_usage
       exit_script
@@ -63,85 +58,77 @@ else
 fi
 
 # runs
-if [[ $RUNS -gt 0 ]]; then
-
-  python ${STRAIN_SCRIPTS}/indexer.py -g ${GENOME}
-  if [ ! -f "${GENOME}".nsq ]; then
-    makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
-  fi
-
-  # create og reference
-  python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
-
-  RUN_NO=1
-  while  [ $RUN_NO -le $RUNS ]
-  do
-
-    # make directories
-    mkdir -p ${DATA_DIR}/run_${RUN_NO}/raw \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete \
-             ${DATA_DIR}/run_${RUN_NO}/initial_blast \
-             ${DATA_DIR}/run_${RUN_NO}/self_search \
-             ${DATA_DIR}/run_${RUN_NO}/to_align \
-             ${DATA_DIR}/run_${RUN_NO}/mafft \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_con \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_unaln \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_blast \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_mafft \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_further \
-             ${DATA_DIR}/run_${RUN_NO}/TEtrim_bp
-    
-    # split
-    cp ${DATA_DIR}/run_$(expr $RUN_NO - 1)/further_${RM_LIBRARY} ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY}
-    echo "Splitting run "${RUN_NO}
-    python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
-
-    # run trf to determine if sequence is tandem repeat
-    echo "Initial trf check for "${RUN_NO}
-    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/run_${RUN_NO}/raw/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/run_${RUN_NO}/raw/{}.trf
-    echo "Initial blast and preparation for MSA "${RUN_NO}
-    # initial blast and extention
-    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 ${STRAIN_SCRIPTS}/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME} -f ${FLANK} -D
-    
-    ## first mafft alignment
-    find ${DATA_DIR}/run_${RUN_NO}/to_align -type f | sed 's/.*\///' > ${DATA_DIR}/run_${RUN_NO}/to_align.txt
-    echo "Primary alignment run "${RUN_NO}
-    parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt mafft --thread 4 --quiet --localpair --adjustdirectionaccurately ${DATA_DIR}/run_${RUN_NO}/to_align/{} ">" ${DATA_DIR}/run_${RUN_NO}/mafft/{}
-
-    # trim
-    echo "Trimming run "${RUN_NO}
-    parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python ${STRAIN_SCRIPTS}/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}
-    
-    # compile completed curations
-    if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/ 2>/dev/null)" ]; then
-       cat ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/*fasta > ${DATA_DIR}/run_${RUN_NO}/complete_${RM_LIBRARY}
-    fi
-    
-    # Either compile consensuses for further curation
-    if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_further/ 2>/dev/null)" ]; then
-      cat ${DATA_DIR}/run_${RUN_NO}/TEtrim_further/*fasta > ${DATA_DIR}/run_${RUN_NO}/further_${RM_LIBRARY}
-      echo "Ready for " $(( RUN_NO++ ))
-    else
-    # or exit loop if no more curation needed
-      echo "Finished extension"
-      break
-    fi
-
-  done
-
-  # Compile all completed
-  cat ${DATA_DIR}/run_*/complete_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
-  # if more could have been extended append to compilation
-  if [ -s ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} ]; then
-    cat ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} >> ${DATA_DIR}/${RM_LIBRARY}
-  fi
-  sed -i 's/ .*//' ${DATA_DIR}/${RM_LIBRARY}
-
-else
-
-echo "No curation"
-
+python ${STRAIN_SCRIPTS}/indexer.py -g ${GENOME}
+if [ ! -f "${GENOME}".nsq ]; then
+  makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
 fi
+
+# create og reference
+python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
+
+RUN_NO=1
+while  [ $RUN_NO -le $RUNS ]
+do
+
+  # make directories
+  mkdir -p ${DATA_DIR}/run_${RUN_NO}/raw \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete \
+           ${DATA_DIR}/run_${RUN_NO}/initial_blast \
+           ${DATA_DIR}/run_${RUN_NO}/self_search \
+           ${DATA_DIR}/run_${RUN_NO}/to_align \
+           ${DATA_DIR}/run_${RUN_NO}/mafft \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_con \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_unaln \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_blast \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_mafft \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_further \
+           ${DATA_DIR}/run_${RUN_NO}/TEtrim_bp
+  
+  # split
+  cp ${DATA_DIR}/run_$(expr $RUN_NO - 1)/further_${RM_LIBRARY} ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY}
+  echo "Splitting run "${RUN_NO}
+  python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
+
+  # run trf to determine if sequence is tandem repeat
+  echo "Initial trf check for "${RUN_NO}
+  parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/run_${RUN_NO}/raw/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/run_${RUN_NO}/raw/{}.trf
+  echo "Initial blast and preparation for MSA "${RUN_NO}
+  # initial blast and extention
+  parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 ${STRAIN_SCRIPTS}/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME} -f ${FLANK} -D
+  
+  ## first mafft alignment
+  find ${DATA_DIR}/run_${RUN_NO}/to_align -type f | sed 's/.*\///' > ${DATA_DIR}/run_${RUN_NO}/to_align.txt
+  echo "Primary alignment run "${RUN_NO}
+  parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt mafft --thread 4 --quiet --localpair --adjustdirectionaccurately ${DATA_DIR}/run_${RUN_NO}/to_align/{} ">" ${DATA_DIR}/run_${RUN_NO}/mafft/{}
+
+  # trim
+  echo "Trimming run "${RUN_NO}
+  parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python ${STRAIN_SCRIPTS}/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}
+  
+  # compile completed curations
+  if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/ 2>/dev/null)" ]; then
+     cat ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/*fasta > ${DATA_DIR}/run_${RUN_NO}/complete_${RM_LIBRARY}
+  fi
+  
+  # Either compile consensuses for further curation
+  if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_further/ 2>/dev/null)" ]; then
+    cat ${DATA_DIR}/run_${RUN_NO}/TEtrim_further/*fasta > ${DATA_DIR}/run_${RUN_NO}/further_${RM_LIBRARY}
+    echo "Ready for " $(( RUN_NO++ ))
+  else
+  # or exit loop if no more curation needed
+    echo "Finished extension"
+    break
+  fi
+
+done
+
+# Compile all completed
+cat ${DATA_DIR}/run_*/complete_${RM_LIBRARY} > ${DATA_DIR}/${RM_LIBRARY}
+# if more could have been extended append to compilation
+if [ -s ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} ]; then
+  cat ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} >> ${DATA_DIR}/${RM_LIBRARY}
+fi
+sed -i 's/ .*//' ${DATA_DIR}/${RM_LIBRARY}
 
 # Identify simple repeats and satellites, trim ends of LINEs/SINEs
 echo "Splitting for simple/satellite packages"
@@ -169,19 +156,13 @@ echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
 find ${DATA_DIR}/ -mindepth 1 -name "run_*" -exec rm -r {} +
 
-# Classify ?
-if [ "$CLASSIFY" == TRUE ]; then
-  # Classify improved consensi using RepeatModeler's RepeatClassifier
-  echo "Reclassifying repeats"
-  mkdir -p ${DATA_DIR}/classify/
-  cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
-  cd ${DATA_DIR}/classify/
-  RepeatClassifier -pa ${THREADS} -consensi rinsed_${RM_LIBRARY}.nonsatellite
-  cd -
-  cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
-  echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
-else
-  echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
-fi
+# Classify improved consensi using RepeatModeler's RepeatClassifier
+echo "Reclassifying repeats"
+mkdir -p ${DATA_DIR}/classify/
+cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
+cd ${DATA_DIR}/classify/
+RepeatClassifier -pa ${THREADS} -consensi rinsed_${RM_LIBRARY}.nonsatellite
+cd -
+cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
+echo "Compiling library"
+cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
