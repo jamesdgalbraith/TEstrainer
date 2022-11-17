@@ -3,13 +3,12 @@
 usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-r Iterations of BEET to run (default 0) ] [-d Out directory, if not specified wil be created ] [-c Set if clustering ] [-C Set if reclassifying ] [-s Set if sorting (only for RepeatModeler output) ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
 
 # default values
+STRAIN_SCRIPTS=INSERT_FILENAME_HERE
 FLANK=1000
 THREADS=4
 RUNS=0
 CLUSTER=FALSE
 CLASSIFY=FALSE
-SORT=FALSE
-DFAM=FALSE
 # for potential folder name
 TIME=$(date +"%s")
 TIME=${TIME: -4}
@@ -25,8 +24,6 @@ while getopts l:g:t:f:r:d:cCsDh flag; do
     d) DATA_DIR=${OPTARG};;
     c) CLUSTER=TRUE ;;
     C) CLASSIFY=TRUE;;
-    s) SORT=TRUE ;;
-    D) DFAM=TRUE ;;
     h | *)
       print_usage
       exit_script
@@ -50,13 +47,13 @@ fi
 
 
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
-echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS "Cluster is" ${CLUSTER} "Dfam is" ${DFAM}
+echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS
 
 # make directories
 mkdir -p ${DATA_DIR}/run_0/
 
 # initial copy
-if [ "$DFAM" == TRUE ]; then python scripts/Dfam_extractor.py -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
+cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY}
 
 # cluster and split step
 if [ "$CLUSTER" == TRUE ]; then
@@ -68,13 +65,13 @@ fi
 # runs
 if [[ $RUNS -gt 0 ]]; then
 
-  python scripts/indexer.py -g ${GENOME}
+  python ${STRAIN_SCRIPTS}/indexer.py -g ${GENOME}
   if [ ! -f "${GENOME}".nsq ]; then
     makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
   fi
 
   # create og reference
-  python scripts/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
+  python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
 
   RUN_NO=1
   while  [ $RUN_NO -le $RUNS ]
@@ -97,14 +94,14 @@ if [[ $RUNS -gt 0 ]]; then
     # split
     cp ${DATA_DIR}/run_$(expr $RUN_NO - 1)/further_${RM_LIBRARY} ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY}
     echo "Splitting run "${RUN_NO}
-    python scripts/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
+    python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_${RUN_NO}/${RM_LIBRARY} -o ${DATA_DIR}/run_${RUN_NO}/raw
 
     # run trf to determine if sequence is tandem repeat
     echo "Initial trf check for "${RUN_NO}
     parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/run_${RUN_NO}/raw/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/run_${RUN_NO}/raw/{}.trf
     echo "Initial blast and preparation for MSA "${RUN_NO}
     # initial blast and extention
-    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 scripts/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME} -f ${FLANK} -D
+    parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/run_${RUN_NO}/raw/${RM_LIBRARY}_split.txt python3 ${STRAIN_SCRIPTS}/initial_mafft_setup.py -d ${DATA_DIR} -r ${RUN_NO} -s {} -g ${GENOME} -f ${FLANK} -D
     
     ## first mafft alignment
     find ${DATA_DIR}/run_${RUN_NO}/to_align -type f | sed 's/.*\///' > ${DATA_DIR}/run_${RUN_NO}/to_align.txt
@@ -113,7 +110,7 @@ if [[ $RUNS -gt 0 ]]; then
 
     # trim
     echo "Trimming run "${RUN_NO}
-    parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python scripts/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}
+    parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python ${STRAIN_SCRIPTS}/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}
     
     # compile completed curations
     if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/ 2>/dev/null)" ]; then
@@ -149,29 +146,28 @@ fi
 # Identify simple repeats and satellites, trim ends of LINEs/SINEs
 echo "Splitting for simple/satellite packages"
 mkdir -p ${DATA_DIR}/trf/split
-python scripts/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/trf/split
+python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/${RM_LIBRARY} -o ${DATA_DIR}/trf/split
 cp ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/trf/
 # Run and parse TRF
 echo "Running TRF"
 parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt trf ${DATA_DIR}/trf/split/{} 2 7 7 80 10 50 500 -d -h -ngs ">" ${DATA_DIR}/trf/split/{}.trf
-parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt python3 scripts/trf_parser.py --trf ${DATA_DIR}/trf/split/{}.trf --out ${DATA_DIR}/trf/split/{}.trf.tsv
+parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt python3 ${STRAIN_SCRIPTS}/trf_parser.py --trf ${DATA_DIR}/trf/split/{}.trf --out ${DATA_DIR}/trf/split/{}.trf.tsv
 find ./${DATA_DIR}/trf/split/ -type f -name "*trf.tsv" -exec cat {} + | cat > ${DATA_DIR}/trf/${RM_LIBRARY}.trf
 # Run SA-SSR
 echo "Running SA-SSR"
 sa-ssr -e -l 20 -L 50000 -m 1 -M 5000 -t ${THREADS} ${DATA_DIR}/${RM_LIBRARY} ${DATA_DIR}/trf/${RM_LIBRARY}.sassr
 # Run and compile mreps
 echo "Running mreps"
-parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt bash scripts/mreps_parser.sh -i ${DATA_DIR}/trf/split/{} "2>"/dev/null
+parallel --bar --jobs ${THREADS} -a ${DATA_DIR}/trf/split/${RM_LIBRARY}_split.txt bash ${STRAIN_SCRIPTS}/mreps_parser.sh -i ${DATA_DIR}/trf/split/{} "2>"/dev/null
 find ./${DATA_DIR}/trf/split/ -type f -name "*mreps" -exec cat {} + | cat > ${DATA_DIR}/trf/${RM_LIBRARY}.mreps
 # Interpret mreps, TRF and SA-SSR
 echo "Trimming and sorting based on mreps, TRF, SA-SSR"
-Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DATA_DIR}
+Rscript ${STRAIN_SCRIPTS}/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DATA_DIR}
 
 # Delete temp files
 echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
 find ${DATA_DIR}/ -mindepth 1 -name "run_*" -exec rm -r {} +
-rm ${GENOME}.n*
 
 # Classify ?
 if [ "$CLASSIFY" == TRUE ]; then
@@ -182,16 +178,10 @@ if [ "$CLASSIFY" == TRUE ]; then
   cd ${DATA_DIR}/classify/
   RepeatClassifier -pa ${THREADS} -consensi rinsed_${RM_LIBRARY}.nonsatellite
   cd -
-  cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}
+  cp ${DATA_DIR}/classify/rinsed_${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
   echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
 else
   echo "Compiling library"
-  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}
-fi
-
-# Sort? (for RepeatModeler output)
-if [ "$SORT" == TRUE ]; then
-  echo "Sorting library"
-  Rscript scripts/final_sorter.R -i ${DATA_DIR}/${RM_LIBRARY}
+  cat ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
 fi
