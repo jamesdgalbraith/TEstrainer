@@ -97,7 +97,7 @@ with open((args.directory+'/run_'+args.iteration+'/raw/'+args.seq_name+'.trf'), 
   for line in trf:
     if line.startswith('@'):
       seqnames = re.sub('@', '', line.split()[0])
-    elif float(line.split()[3]) > 3:
+    elif float(line.split()[3]) > 5:
       trf_df = pd.concat([trf_df, pd.DataFrame({'Chromosome':[seqnames], 'Start':[int(line.split()[0])], 'End':[int(line.split()[1])]})])
 # Merge trf pr
 trf_pr=pr.PyRanges(df=trf_df).merge()

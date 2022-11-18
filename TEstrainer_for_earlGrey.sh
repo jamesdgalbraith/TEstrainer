@@ -42,7 +42,6 @@ fi
 
 
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
-echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS
 
 # make directories
 mkdir -p ${DATA_DIR}/run_0/
@@ -50,12 +49,11 @@ mkdir -p ${DATA_DIR}/run_0/
 # initial copy
 cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY}
 
-# cluster and split step
-if [ "$CLUSTER" == TRUE ]; then
-  cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o ${DATA_DIR}/run_0/further_${RM_LIBRARY} # cluster seq
-else
-  cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
-fi
+# cp starting seq to starting directory
+mkdir -p ${DATA_DIR}/run_0/og
+cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
+# create reference of original sequences
+python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
 
 # runs
 python ${STRAIN_SCRIPTS}/indexer.py -g ${GENOME}
@@ -63,9 +61,7 @@ if [ ! -f "${GENOME}".nsq ]; then
   makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
 fi
 
-# create og reference
-python ${STRAIN_SCRIPTS}/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
-
+# curation
 RUN_NO=1
 while  [ $RUN_NO -le $RUNS ]
 do
