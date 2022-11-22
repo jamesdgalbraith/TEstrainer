@@ -1,21 +1,21 @@
 #!/bin/bash
 
-usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-r Iterations of BEET to run (default 0) ] [-d Out directory, if not specified wil be created ] [-c Set if clustering ] [-C Set if reclassifying ] [-s Set if sorting (only for RepeatModeler output) ] [-D Set if fixing Dfam data ] [-h Print this help]" 1>&2; exit 1; }
+usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-r Iterations of BEET to run (default 0) ] [-d Out directory, if not specified wil be created ] [-c Set if clustering ] [-C Set if reclassifying ] [-s Set if sorting (only for RepeatModeler output) ] [-D Set if printing all messages ] [-h Print this help]" 1>&2; exit 1; }
 
 # default values
 FLANK=1000
 THREADS=4
 RUNS=0
-CLUSTER=FALSE
 CLASSIFY=FALSE
 SORT=FALSE
-DFAM=FALSE
+DEBUG=FALSE
+# DFAM=FALSE
 # for potential folder name
 TIME=$(date +"%s")
 TIME=${TIME: -4}
 
 # parsing
-while getopts l:g:t:f:r:d:cCsDh flag; do
+while getopts l:g:t:f:r:d:CsDh flag; do
   case "${flag}" in
     l) RM_LIBRARY_PATH=${OPTARG};;
     g) GENOME=${OPTARG};;
@@ -23,10 +23,9 @@ while getopts l:g:t:f:r:d:cCsDh flag; do
     f) FLANK=${OPTARG};;
     r) RUNS=${OPTARG};;
     d) DATA_DIR=${OPTARG};;
-    c) CLUSTER=TRUE ;;
     C) CLASSIFY=TRUE;;
     s) SORT=TRUE ;;
-    D) DFAM=TRUE ;;
+    D) DEBUG=TRUE ;;
     h | *)
       print_usage
       exit_script
@@ -41,45 +40,43 @@ if [[ $RUNS -gt 0 ]]; then
   if [ ! -f ${GENOME} ]; then echo "Refining genome not found"; usage; fi
 fi
 if [ -z "$DATA_DIR" ]; then DATA_DIR=$(echo "TS_"${RM_LIBRARY}"_"${TIME}); fi
-
+if [ "$DEBUG" == TRUE ]; then echo "Files all exist" ;fi
 # create data dir if missing
 if [ ! -d ${DATA_DIR} ] 
 then
     mkdir ${DATA_DIR}
 fi
 
-
 if [[ $THREADS -gt 4 ]]; then MAFFT_THREADS=$(($(($THREADS / 4)))); else MAFFT_THREADS=1; fi
-echo $RM_LIBRARY_PATH $GENOME $RM_LIBRARY $THREADS $FLANK $RUNS $DATA_DIR $MAFFT_THREADS "Cluster is" ${CLUSTER} "Dfam is" ${DFAM}
 
 # make directories
 mkdir -p ${DATA_DIR}/run_0/
 
+# # dfam  extract
+# if [ "$DFAM" == TRUE ]; then python scripts/Dfam_extractor.py -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
+
 # initial copy
-if [ "$DFAM" == TRUE ]; then python scripts/Dfam_extractor.py -l ${RM_LIBRARY_PATH} -d ${DATA_DIR} ; else cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY};fi
+if [ "$DEBUG" == TRUE ]; then echo "Copying library to data dir" ;fi
+cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
 
-# cluster and split step
-if [ "$CLUSTER" == TRUE ]; then
-  cd-hit-est -n 10 -c 0.95 -i ${RM_LIBRARY_PATH} -o ${DATA_DIR}/run_0/further_${RM_LIBRARY} # cluster seq
-else
-  cp ${RM_LIBRARY_PATH} ${DATA_DIR}/run_0/further_${RM_LIBRARY}
-fi
-
-# runs
+# setup for BEET runs
 if [[ $RUNS -gt 0 ]]; then
-
+  
+  # index genome and make blast db
+  if [ "$DEBUG" == TRUE ]; then echo "Indexing genome" ;fi
   python scripts/indexer.py -g ${GENOME}
   if [ ! -f "${GENOME}".nsq ]; then
     makeblastdb -in ${GENOME} -dbtype nucl -out ${GENOME} # makeblastb if needed
   fi
-
+  
   # create og reference
   python scripts/splitter.py -i ${DATA_DIR}/run_0/further_${RM_LIBRARY} -o ${DATA_DIR}/run_0/og
 
   RUN_NO=1
+  # BEET runs
   while  [ $RUN_NO -le $RUNS ]
   do
-
+  if [ "$DEBUG" == TRUE ]; then echo "Making "${RUN_NO}" directories"; fi
     # make directories
     mkdir -p ${DATA_DIR}/run_${RUN_NO}/raw \
              ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete \
