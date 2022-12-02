@@ -31,7 +31,7 @@ while getopts l:g:t:f:r:d:CsDh flag; do
       exit_script
   esac
 done
-
+echo "Running using"$GENOME" and "$RM_LIBRARY_PATH
 # determine further variables and check files exist
 if [ ! -f ${RM_LIBRARY_PATH} ]; then echo "Library not found"; usage; fi
 if [ -z ${RM_LIBRARY_PATH} ]; then echo "Library must be supplied"; usage; else RM_LIBRARY=$(echo $RM_LIBRARY_PATH | sed 's/.*\///'); fi
@@ -140,6 +140,7 @@ if [[ $RUNS -gt 0 ]]; then
 else
 
 echo "No curation"
+cp ${RM_LIBRARY_PATH} ${DATA_DIR}/${RM_LIBRARY}
 
 fi
 
