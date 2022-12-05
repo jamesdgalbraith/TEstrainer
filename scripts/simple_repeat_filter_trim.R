@@ -30,9 +30,10 @@ in_seq_tbl <- tibble(seqnames = names(in_seq), og_width = width(in_seq)) %>%
   dplyr::mutate(draft_seqnames = sub("#.*", "", seqnames))
 
 # read in, rearrange and calculate percent tandem repeats for SA-SSR data
-sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"),
-                  col_names = c("seqnames", "ssr", "count", "start"), skip = 1, show_col_types = F) %>%
-  dplyr::mutate(period = as.double(width(ssr))) %>%
+sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"), 
+                  skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F) %>%
+  dplyr::mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
+                period = as.double(width(ssr))) %>%
   dplyr::mutate(ssr_width = count*period, end = start + ssr_width, start = start +1) %>%
                 mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
   inner_join(in_seq_tbl, by = "seqnames") %>%
@@ -53,7 +54,8 @@ sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
 # read in, rearrange and calculate percent tandem repeats for TRF data
 trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
                 col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F) %>%
-  mutate(draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
+  mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
+         draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
   dplyr::mutate(ssr_width = end - start + 1) %>%
   inner_join(in_seq_tbl, by = "draft_seqnames")
 
