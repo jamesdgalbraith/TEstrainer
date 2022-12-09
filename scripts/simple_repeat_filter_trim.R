@@ -30,80 +30,122 @@ in_seq_tbl <- tibble(seqnames = names(in_seq), og_width = width(in_seq)) %>%
   dplyr::mutate(draft_seqnames = sub("#.*", "", seqnames))
 
 # read in, rearrange and calculate percent tandem repeats for SA-SSR data
-sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"), 
-                  skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F) %>%
-  dplyr::mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
-                period = as.double(width(ssr))) %>%
-  dplyr::mutate(ssr_width = count*period, end = start + ssr_width, start = start +1) %>%
-                mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
-  inner_join(in_seq_tbl, by = "seqnames") %>%
-  arrange(seqnames) %>%
-  filter(count > 2)
+# check sassr empty, if so create empty tbl, else analyse data
+if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr")) == 0){
+  
+  sassr_calc <- tibble(seqnames = character(), sassr_perc_tr = double())
+  
+  sassr_select <- tibble(seqnames = character(), start = double(), end = double(),
+                         period = double(), count = double(), og_width = integer(),
+                         ssr = character(), ssr_width = double(), package = "sassr")
+  
+} else {
 
-sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
-  dplyr::select(-strand) %>%
-  dplyr::mutate(seqnames = as.character(seqnames)) %>%
-  group_by(seqnames) %>%
-  mutate(total_width = sum(width)) %>%
-  ungroup() %>%
-  inner_join(in_seq_tbl, by = "seqnames") %>%
-  dplyr::mutate(sassr_perc_tr = 100*total_width/og_width) %>%
-  dplyr::select(seqnames, sassr_perc_tr) %>%
-  base::unique()
+  sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"), 
+                    skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F) %>%
+    dplyr::mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
+                  period = as.double(width(ssr))) %>%
+    dplyr::mutate(ssr_width = count*period, end = start + ssr_width, start = start +1) %>%
+                  mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
+    inner_join(in_seq_tbl, by = "seqnames") %>%
+    arrange(seqnames) %>%
+    filter(count > 2)
+  
+  sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
+    dplyr::select(-strand) %>%
+    dplyr::mutate(seqnames = as.character(seqnames)) %>%
+    group_by(seqnames) %>%
+    mutate(total_width = sum(width)) %>%
+    ungroup() %>%
+    inner_join(in_seq_tbl, by = "seqnames") %>%
+    dplyr::mutate(sassr_perc_tr = 100*total_width/og_width) %>%
+    dplyr::select(seqnames, sassr_perc_tr) %>%
+    base::unique()
+  
+  sassr_select <- sassr %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
+    mutate(package = "sassr")
 
+}
+
+# check trf empty, if so create empty tbl, else analyse data
 # read in, rearrange and calculate percent tandem repeats for TRF data
-trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
-                col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F) %>%
-  mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
-         draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
-  dplyr::mutate(ssr_width = end - start + 1) %>%
-  inner_join(in_seq_tbl, by = "draft_seqnames")
-
-trf_select <- trf  %>%
-  filter(count > 2) %>%
-  dplyr::select(seqnames, start, end)
-
-trf_calc <- as_tibble(reduce(as_granges(trf_select))) %>%
-  dplyr::select(-strand) %>%
-  dplyr::mutate(seqnames = as.character(seqnames)) %>%
-  group_by(seqnames) %>%
-  mutate(total_width = sum(width)) %>%
-  ungroup() %>%
-  inner_join(in_seq_tbl, by = "seqnames") %>%
-  dplyr::mutate(trf_perc_tr = 100*total_width/og_width) %>%
-  dplyr::select(seqnames, trf_perc_tr) %>%
-  base::unique()
+if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".trf")) == 0){
+  trf_select <- tibble(seqnames = character(), start = double(), end = double(),
+                         period = double(), count = double(), og_width = integer(),
+                         ssr = character(), ssr_width = double(), package = "trf")
+  
+  trf_calc <- tibble(seqnames = character(), trf_perc_tr = double())
+  
+} else {
+  trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
+                  col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F) %>%
+    mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
+           draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
+    dplyr::mutate(ssr_width = end - start + 1) %>%
+    inner_join(in_seq_tbl, by = "draft_seqnames")
+  
+  trf_select <- trf  %>%
+    filter(count > 2) %>%
+    dplyr::select(seqnames, start, end)
+  
+  trf_calc <- as_tibble(reduce(as_granges(trf_select))) %>%
+    dplyr::select(-strand) %>%
+    dplyr::mutate(seqnames = as.character(seqnames)) %>%
+    group_by(seqnames) %>%
+    mutate(total_width = sum(width)) %>%
+    ungroup() %>%
+    inner_join(in_seq_tbl, by = "seqnames") %>%
+    dplyr::mutate(trf_perc_tr = 100*total_width/og_width) %>%
+    dplyr::select(seqnames, trf_perc_tr) %>%
+    base::unique()
+  
+  trf_select <- trf %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
+    mutate(package = "trf")
+  
+}
 
 # read in, rearrange and calculate percent tandem repeats for MREPS data
-mreps <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps"),
-                  col_names = c("draft_seqnames", "start", "end", "ssr_width", "period", "count", "error", "sequence"), show_col_types = F) %>%
-  mutate(ssr = substr(x = sequence, start = 0, stop = period)) %>%
-  inner_join(in_seq_tbl, by = "draft_seqnames")
+if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps")) == 0){
+  mreps_select <- tibble(seqnames = character(), start = double(), end = double(),
+                         period = double(), count = double(), og_width = integer(),
+                         ssr = character(), ssr_width = double(), package = "mreps")
+  
+  mreps_calc <- tibble(seqnames = character(), mreps_perc_tr = double())
 
-mreps_select <- mreps %>%
-  filter(count > 2) %>%
-  dplyr::select(seqnames, start, end)
-
-mreps_calc <- as_tibble(reduce(as_granges(mreps_select))) %>%
-  dplyr::select(-strand) %>%
-  dplyr::mutate(seqnames = as.character(seqnames)) %>%
-  group_by(seqnames) %>%
-  mutate(total_width = sum(width)) %>%
-  ungroup() %>%
-  inner_join(in_seq_tbl, by = "seqnames") %>%
-  dplyr::mutate(mreps_perc_tr = 100*total_width/og_width) %>%
-  dplyr::select(seqnames, mreps_perc_tr) %>%
-  base::unique()
+} else {
+  mreps <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps"),
+                    col_names = c("draft_seqnames", "start", "end", "ssr_width", "period", "count", "error", "sequence"), show_col_types = F) %>%
+    mutate(ssr = substr(x = sequence, start = 0, stop = period)) %>%
+    inner_join(in_seq_tbl, by = "draft_seqnames")
+  
+  mreps_select <- mreps %>%
+    filter(count > 2) %>%
+    dplyr::select(seqnames, start, end)
+  
+  mreps_calc <- as_tibble(reduce(as_granges(mreps_select))) %>%
+    dplyr::select(-strand) %>%
+    dplyr::mutate(seqnames = as.character(seqnames)) %>%
+    group_by(seqnames) %>%
+    mutate(total_width = sum(width)) %>%
+    ungroup() %>%
+    inner_join(in_seq_tbl, by = "seqnames") %>%
+    dplyr::mutate(mreps_perc_tr = 100*total_width/og_width) %>%
+    dplyr::select(seqnames, mreps_perc_tr) %>%
+    base::unique()
+  
+  mreps_select <- mreps %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
+    mutate(package = "mreps")
+}
 
 # Compile data
-trf_select <- trf %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
-  mutate(package = "trf")
-mreps_select <- mreps %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
-  mutate(package = "mreps")
-sassr_select <- sassr %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
-  mutate(package = "sassr")
 compiled_tr <- rbind(rbind(trf_select, mreps_select), sassr_select)
 stats_tr <- full_join(sassr_calc, full_join(mreps_calc, trf_calc, by = "seqnames"), by = "seqnames")
+
+# if no data write to og seq to file as nonsatellite and exit
+if(nrow(compiled_tr) == 0){
+  writeXStringSet(c(trimmed_seq, untouched_seq), paste0(opt$directory, "/trf/", opt$out_seq, ".nonsatellite"))
+  stop()
+}
 
 # Identifying satellite/simple repeats
 over50tr <- stats_tr %>%
