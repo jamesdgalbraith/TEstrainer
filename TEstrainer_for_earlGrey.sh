@@ -153,6 +153,7 @@ Rscript ${STRAIN_SCRIPTS}/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRAR
 echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
 find ${DATA_DIR}/ -mindepth 1 -name "run_*" -exec rm -r {} +
+if [[ $RUNS -gt 0 ]]; then rm ${GENOME}.n*; fi
 
 # Classify improved consensi using RepeatModeler's RepeatClassifier
 echo "Reclassifying repeats"

@@ -183,7 +183,8 @@ cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_
 echo "Removing temporary files"
 rm -r ${DATA_DIR}/*/split/
 find ${DATA_DIR}/ -mindepth 1 -name "run_*" -exec rm -r {} +
-rm ${GENOME}.n*
+if [[ $RUNS -gt 0 ]]; then rm ${GENOME}.n*; fi
+
 
 # Classify ?
 if [ "$CLASSIFY" == TRUE ]; then
