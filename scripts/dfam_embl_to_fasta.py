@@ -38,8 +38,6 @@ seq_df=pd.DataFrame(data={'ID': [ID], 'Subclass': [subclass], 'Family': [family]
 
 # remove compiled fasta if already existant
 if os.path.exists(sub('.embl', '.fasta', args.in_file)):
-  to_remove=sub('.embl', '.fasta', args.in_file)
-  print(to_remove)
   os.remove(sub('.embl', '.fasta', args.in_file)) 
 
 # if file contains data,
