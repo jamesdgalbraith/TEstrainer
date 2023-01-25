@@ -59,42 +59,15 @@ repbase_dna <- repbase_dna[sub("#.*", "", sub("\t.*", "", names(repbase_dna))) %
 names(repbase_dna) <- sub("#.*", "", sub("\t.*", "", names(repbase_dna)))
 writeXStringSet(repbase_dna, "predata/repbase_dfam_compiled.fasta")
 
-# # get orf info to ensure only TEs with ORFs over 300aa included (removes noise from non-autonomous)
-# # positive strands
-# pos <- findORFs(repbase_dna, startCodon = "ATG", minimumLength = 300)
-# # negative strands
-# neg <- findORFs(reverseComplement(repbase_dna),
-#                 startCodon = "ATG", minimumLength = 300)
-# pos <- GRanges(pos, strand = "+")
-# neg <- GRanges(neg, strand = "-")
-# res <- c(pos, neg) %>%
-#   as_tibble() %>%
-#   mutate(name = as.integer(as.character(seqnames))) %>%
-#   dplyr::select(-seqnames, -width)
-# 
-# repbase_seq_info <- inner_join(repbase_seq_info, res) %>%
-#   dplyr::select(seqnames, class, width) %>%
-#   base::unique()
-# 
-# as_tibble(as.data.frame(table(repbase_seq_info$class))) %>%
-#   dplyr::filter(Freq >= 3) %>%
-#   arrange(Freq)
-# 
-# repbase_seq_count <- as_tibble(as.data.frame(table(repbase_seq_info$class))) %>%
-#   dplyr::filter(Freq >= 10) %>%
-#   dplyr::mutate(Var1 = as.character(Var1)) %>%
-#   dplyr::rename(class = Var1, class_n = Freq)
-# 
-# repbase_seq_info <- repbase_seq_info %>%
-#   dplyr::inner_join(repbase_seq_count)
-# View(repbase_seq_count)
+#### RUN RPSTBLASTN AGAINST CDD ####
+
 
 # read in repbase rpstblastn
 repbase_rps_out <- readr::read_tsv(file = "predata/repbase_dfam_compiled.rps.out",
                                    col_names = c("seqnames", "qstart", "qend", "qlen", "sseqid", "sstart", "send", "slen",
                                                  "pident", "length", "mismatch", "gapopen", "evalue", "bitscore", "qcovs", "stitle"),
                                    show_col_types = F) %>%
-  dplyr::filter(length >= 0.5*slen)
+  dplyr::filter(length >= 0.5*slen, evalue <= 0.01)
 
 missing <- repbase_rps_out %>% filter(!seqnames %in% repbase_seq_info$seqnames)
 
@@ -120,12 +93,12 @@ for(i in 1:nrow(repbase_class_info_max)){
     dplyr::slice(1) %>% # ensure one representative for each domain for each repeat
     ungroup()
   if(nrow(holder >= 1)){
-    if(repbase_class_info_max$Freq[i] > 100){
+    if(repbase_class_info_max$Freq[i] > 299){
     holder_tbl <- as_tibble(as.data.frame(table(holder$ref))) %>%
       mutate(Var1 = as.character(Var1),
              perc = Freq/repbase_class_info_max$Freq[i]) %>%
       dplyr::rename(ref = Var1) %>%
-      filter(perc >= 0.03) %>%
+      filter(perc >= 0.01, Freq >= 3) %>%
       inner_join(domain_info) %>%
       mutate(class = repbase_class_info_max$class[i]) %>%
       dplyr::arrange(-Freq)
@@ -143,13 +116,13 @@ for(i in 1:nrow(repbase_class_info_max)){
   }
 }
 
-View(common_domains)
-
 # write to file
 base::unique(common_domains %>% select(ref, abbrev)) %>%
-  # dplyr::filter(!startsWith(tolower(abbrev), "ig"),
-  #               !startsWith(tolower(abbrev), "znmc"),
-  #               !startsWith(tolower(abbrev), "7tm")) %>%
-  write_tsv("acceptable_domains.tsv")
+  dplyr::filter(!startsWith(tolower(abbrev), "ig"),
+                !startsWith(tolower(abbrev), "znmc"),
+                abbrev != "V-set") %>%
+  write_tsv("data/acceptable_domains.tsv")
 
-View(base::unique(common_domains))
+base::unique(common_domains %>% select(class, ref, abbrev)) %>%
+  dplyr::filter(startsWith(tolower(abbrev), "ig") | startsWith(tolower(abbrev), "znmc") | abbrev == "V-set") %>%
+  write_tsv("data/exceptional_domains.tsv")
