@@ -9,7 +9,7 @@ option_list <- list(
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
-opt <- list(in_seq = "seq/dfam_extracts/dfam_lepidosaurs.fasta", directory = "TS_dfam_lepidosaurs.fasta_5287////", plot=TRUE)
+# opt <- list(in_seq = "seq/dfam_extracts/dfam_lepidosaurs.fasta", directory = "TS_dfam_lepidosaurs.fasta_5287////", plot=TRUE)
 
 # check variables provided
 if(is.na(opt$in_seq)){
