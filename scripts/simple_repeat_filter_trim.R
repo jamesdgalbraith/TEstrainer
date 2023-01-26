@@ -4,7 +4,8 @@ library(optparse)
 
 option_list <- list(
   make_option(c("-i", "--in_seq"), default=NA, type = "character", help="Input sequence (required)"),
-  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character")
+  make_option(c("-d", "--directory"), type="character", default=NULL, help="Path to data directory (required)", metavar="character"),
+  make_option(c("-p", "--sat_perc"), type="integer", default=60, help="Minimum percentage of total sequence classed as SSR for repeat to be considered a satellite")
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
@@ -149,7 +150,7 @@ if(nrow(compiled_tr) == 0){
 
 # Identifying satellite/simple repeats
 over50tr <- stats_tr %>%
-  filter(sassr_perc_tr >= 50 | mreps_perc_tr >= 50 | trf_perc_tr >= 50) %>%
+  filter(sassr_perc_tr >= opt$sat_perc | mreps_perc_tr >= opt$sat_perc | trf_perc_tr >= opt$sat_perc) %>%
   mutate(sassr_perc_tr = ifelse(is.na(sassr_perc_tr), 0, sassr_perc_tr),
          mreps_perc_tr = ifelse(is.na(mreps_perc_tr), 0, mreps_perc_tr),
          trf_perc_tr = ifelse(is.na(trf_perc_tr), 0, trf_perc_tr))
