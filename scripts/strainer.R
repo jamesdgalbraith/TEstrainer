@@ -9,7 +9,7 @@ option_list <- list(
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
-# opt <- list(in_seq = "seq/dfam_extracts/dfam_lepidosaurs.fasta", directory = "TS_dfam_lepidosaurs.fasta_5287////", plot=TRUE)
+opt <- list(in_seq = "seq/dfam_extracts/dfam_lepidosaurs.fasta", directory = "TS_dfam_lepidosaurs.fasta_2279/", plot=TRUE)
 
 # check variables provided
 if(is.na(opt$in_seq)){
@@ -174,16 +174,16 @@ if(nrow(questionable) > 0){
   writeXStringSet(questionable_seq, paste0(opt$directory, "/chimeras/questionable_", opt$out_seq))
   
 }
-# plotting section for manual consideration of chimeric elements
-if(opt$plot == TRUE & nrow(chimeric) > 0){
+# plotting section for manual consideration of truly_chimeric elements
+if(opt$plot == TRUE & nrow(truly_chimeric) > 0){
   
   if(!file.exists(paste0(opt$directory, "/chimeras/plots/"))){
     dir.create(paste0(opt$directory, "/chimeras/plots/"))
   }
   
-  for(i in 1:length(base::unique(chimeric$seqnames))){
+  for(i in 1:length(base::unique(truly_chimeric$seqnames))){
     
-    to_plot <- chimeric[chimeric$seqnames == base::unique(chimeric$seqnames)[i],] %>% arrange(qstart) %>%
+    to_plot <- truly_chimeric[truly_chimeric$seqnames == base::unique(truly_chimeric$seqnames)[i],] %>% arrange(qstart) %>%
       mutate(missing = ifelse(ref %in% acceptable_domains$ref, FALSE, TRUE))
     to_plot$y = 1:nrow(to_plot)
     to_plot$text_x = (to_plot$qstart + to_plot$qend)/2
