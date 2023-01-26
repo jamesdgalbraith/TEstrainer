@@ -9,7 +9,6 @@ option_list <- list(
 )
 
 opt <- parse_args(OptionParser(option_list=option_list))
-opt <- list(in_seq = "seq/dfam_extracts/dfam_lepidosaurs.fasta", directory = "TS_dfam_lepidosaurs.fasta_2279/", plot=TRUE)
 
 # check variables provided
 if(is.na(opt$in_seq)){
@@ -38,9 +37,12 @@ truly_chimeric_ranges <- GRanges()
 questionable <- tibble()
 no_domains_seq <- DNAStringSet()
 
-# read in acceptable domains and exceptional
+# read in acceptable domains and exceptional domains and manually added additional domains
 exceptional_domains <- read_tsv("data/exceptional_domains.tsv", show_col_types = FALSE) %>%
   dplyr::select(ref, class) %>% dplyr::rename(excep_class = class)
+additional_domains <- read_tsv("data/additional_domains.tsv", show_col_types = FALSE) %>%
+  dplyr::select(ref, class) %>% dplyr::rename(excep_class = class)
+exceptional_domains <- rbind(exceptional_domains, additional_domains)
 
 acceptable_domains <- read_tsv("data/acceptable_domains.tsv", show_col_types = FALSE)
 
@@ -86,11 +88,12 @@ chimeric <- rps_blast_out %>%
 # check if domains fit exceptional circumstances (grepl used to allow for the various ERVs)
 excep_check <- chimeric %>%
   inner_join(exceptional_domains)
+
 for( i in 1:nrow(excep_check)){
   if(grepl(pattern = excep_check$excep_class[i], x = excep_check$seqnames[i])){
-    excep_check$unacceptable[i] == "false"
+    excep_check$unacceptable[i] <- "false"
   } else {
-    excep_check$unacceptable[i] == "true"
+    excep_check$unacceptable[i] <- "true"
   }
 }
 
@@ -198,7 +201,7 @@ if(opt$plot == TRUE & nrow(truly_chimeric) > 0){
       ggtitle(to_plot$seqnames[1]) +
       theme_bw()
     
-    ggsave(filename = paste0(opt$directory, "/chimeras/plots/chimeric_", gsub("/", "_", base::unique(chimeric$seqnames)[i]), ".svg"), device = "svg")
+    ggsave(filename = paste0(opt$directory, "/chimeras/plots/", gsub("/", "_", base::unique(truly_chimeric$seqnames)[i]), ".svg"), device = "svg")
     
   }
   
