@@ -198,7 +198,7 @@ if(opt$plot == TRUE & nrow(chimeric) > 0){
       ggtitle(to_plot$seqnames[1]) +
       theme_bw()
     
-    ggsave(filename = paste0(opt$directory, "/chimeras/plots/chimeric_", gsub("/", "_", base::unique(chimeric$seqnames)[i])), device = "svg")
+    ggsave(filename = paste0(opt$directory, "/chimeras/plots/chimeric_", gsub("/", "_", base::unique(chimeric$seqnames)[i]), ".svg"), device = "svg")
     
   }
   
