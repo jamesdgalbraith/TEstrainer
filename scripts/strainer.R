@@ -56,9 +56,8 @@ rps_blast_out <- read_tsv(file = opt$rps_table,
                                            col_names = c("seqnames", "qstart", "qend", "qlen", "sseqid", "sstart", "send", "slen",
                                                          "pident", "length", "mismatch", "gapopen", "evalue", "bitscore", "qcovs", "stitle"),
                                            show_col_types = FALSE) %>%
-                   tidyr::separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ", extra = "drop")
-
-rps_blast_out <- rps_blast_out %>% dplyr::filter(length >= 0.5*slen)
+                   tidyr::separate(stitle, into = c("ref", "abbrev", "full"), sep = ", ", extra = "drop") %>%
+  dplyr::filter(length >= 0.5*slen)
 
 rps_blast_out$n <- 1:nrow(rps_blast_out)
 

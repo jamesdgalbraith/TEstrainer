@@ -51,7 +51,7 @@ if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr")) == 0){
     arrange(seqnames) %>%
     filter(count > 2)
   
-  sassr_calc <- as_tibble(reduce(as_granges(sassr))) %>%
+  sassr_calc <- as_tibble(GenomicRanges::reduce(as_granges(sassr))) %>%
     dplyr::select(-strand) %>%
     dplyr::mutate(seqnames = as.character(seqnames)) %>%
     group_by(seqnames) %>%
@@ -88,7 +88,7 @@ if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".trf")) == 0){
     filter(count > 2) %>%
     dplyr::select(seqnames, start, end)
   
-  trf_calc <- as_tibble(reduce(as_granges(trf_select))) %>%
+  trf_calc <- as_tibble(GenomicRanges::reduce(as_granges(trf_select))) %>%
     dplyr::select(-strand) %>%
     dplyr::mutate(seqnames = as.character(seqnames)) %>%
     group_by(seqnames) %>%
@@ -122,7 +122,7 @@ if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps")) == 0){
     filter(count > 2) %>%
     dplyr::select(seqnames, start, end)
   
-  mreps_calc <- as_tibble(reduce(as_granges(mreps_select))) %>%
+  mreps_calc <- as_tibble(GenomicRanges::reduce(as_granges(mreps_select))) %>%
     dplyr::select(-strand) %>%
     dplyr::mutate(seqnames = as.character(seqnames)) %>%
     group_by(seqnames) %>%
@@ -169,7 +169,8 @@ macrosatellites <- satellites %>%
   filter(max_perc_tr > 90, count >= 2) %>%
   filter(period > 200) %>%
   mutate(start = start + period,
-         end = start + period) %>%
+         end = start + period,
+         end = ifelse(end > og_width, og_width, end)) %>%
   as_granges()
 macrosatellites_seq <- getSeq(in_seq, macrosatellites)
 names(macrosatellites_seq) <- sub("#.*", "#Satellite", seqnames(macrosatellites))
