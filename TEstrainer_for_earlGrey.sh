@@ -128,7 +128,7 @@ if [ -s ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} ]; then
   cat ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} >> ${DATA_DIR}/${RM_LIBRARY}
 fi
 # add any families which went missing along the way due to alignment issues
-cat $(find ${DATA_DIR}/run_*/mafft/ -empty | sed 's/mafft/raw/') >> ${DATA_DIR}/${RM_LIBRARY}
+if [ $(find ${DATA_DIR}/run_*/mafft/ -empty | wc -l) > 0 ]; then cat $(find ${DATA_DIR}/run_*/mafft/ -empty | sed 's/mafft/raw/') >> ${DATA_DIR}/${RM_LIBRARY};fi
 sed -i 's/ .*//' ${DATA_DIR}/${RM_LIBRARY}
 
 # Identify simple repeats and satellites, trim ends of LINEs/SINEs
