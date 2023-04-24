@@ -129,7 +129,7 @@ if [ -s ${DATA_DIR}/run_${RUNS}/further_${RM_LIBRARY} ]; then
 fi
 
 # add any families which went missing along the way due to alignment issues
-  find ${DATA_DIR}/run_*/mafft/ -empty | sed 's/mafft/raw/' > ${DATA_DIR}/missing_consensi.txt
+find ${DATA_DIR}/run_*/mafft/ -empty -type f | sed 's/mafft/raw/' > ${DATA_DIR}/missing_consensi.txt
 if [[ -s ${DATA_DIR}/missing_consensi.txt ]]; then
   while read file_name; do
     cat $file_name >> ${DATA_DIR}/${RM_LIBRARY}
@@ -172,6 +172,11 @@ cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/classify/
 cd ${DATA_DIR}/classify/
 RepeatClassifier -pa ${THREADS} -consensi ${RM_LIBRARY}.nonsatellite
 cd -
-cp ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
+# Compile classified files
+if [ - f ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified]; then
+    cp ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified ${DATA_DIR}/${RM_LIBRARY}.strained
+else
+    touch ${DATA_DIR}/${RM_LIBRARY}.strained
+fi
 echo "Compiling library"
 cat ${DATA_DIR}/trf/${RM_LIBRARY}.satellites >> ${DATA_DIR}/${RM_LIBRARY}.strained
