@@ -72,7 +72,7 @@ align = AlignIO.read(in_seq_path, "fasta")
 final_id = align[0].id
 if args.debug == 'TRUE':
   print(final_id)
-og_con = SeqRecord(seq= align[0].seq.ungap("-"), id=align[0].id, name=align[0].id)
+og_con = SeqRecord(seq= align[0].seq.replace("-", ""), id=align[0].id, name=align[0].id)
 SeqIO.write(og_con, (args.directory+'/run_'+args.iteration+'/TEtrim_con/og_'+seq_name),"fasta")
 align = align[1:len(align)]
 
