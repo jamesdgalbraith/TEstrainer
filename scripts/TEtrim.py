@@ -97,7 +97,7 @@ if args.debug == 'TRUE':
   print('Creating unaligned sequences')
 with open((args.directory+'/run_'+args.iteration+'/TEtrim_unaln/temp_'+seq_name), "w") as o:
   for record in SeqIO.parse((args.directory+'/run_'+args.iteration+'/TEtrim_bp/trimmed_'+seq_name), "fasta"):
-    record.seq = record.seq.ungap("-")
+    record.seq = record.seq.replace("-", "")
     SeqIO.write(record, o, "fasta-2line")
 
 ### run blast ###
