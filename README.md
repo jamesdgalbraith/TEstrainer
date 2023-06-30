@@ -26,6 +26,8 @@ BLAST+ - Altschul, S.F. et al. (1997). https://doi.org/10.1089/10665270050081478
 
 MAFFT - Katoh, K and Standley, D.M. (2013). https://doi.org/10.1093/molbev/mst010
 
+TRF - Benson, G. (1999). https://doi.org/10.1093/nar/27.2.573
+
 mreps - Kolpakov, R et al. (2003). https://doi.org/10.1093/nar/gkg617
 
 sa-ssr - Pickett, B.D. (2016). https://doi.org/10.1093/bioinformatics/btw298
