@@ -1,5 +1,3 @@
-#!/usr/bin/Rscript
-
 library(ORFik)
 library(tidyverse)
 library(plyranges)

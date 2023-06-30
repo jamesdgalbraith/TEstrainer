@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from argparse import (ArgumentParser, FileType)
 
 def parse_args():

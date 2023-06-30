@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from re import sub
 from os.path import exists
