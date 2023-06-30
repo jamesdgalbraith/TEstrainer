@@ -175,7 +175,7 @@ echo "Trimming and sorting based on mreps, TRF, SA-SSR"
 Rscript scripts/simple_repeat_filter_trim.R -i ${DATA_DIR}/${RM_LIBRARY} -d ${DATA_DIR}
 
 # Identify and trim chimeric repeats from non-satellite repeats, remove proteins
-if [ - f ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified ]; then
+if [ -f ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite.classified ]; then
     mkdir -p ${DATA_DIR}/chimeras/split/
     cp ${DATA_DIR}/trf/${RM_LIBRARY}.nonsatellite ${DATA_DIR}/chimeras/${RM_LIBRARY}
     echo "Split ready for rpstblastn"
@@ -187,6 +187,7 @@ if [ - f ${DATA_DIR}/classify/${RM_LIBRARY}.nonsatellite.classified ]; then
     Rscript scripts/strainer.R --in_seq ${DATA_DIR}/chimeras/${RM_LIBRARY} --directory ${DATA_DIR}
     cat ${DATA_DIR}/chimeras/clean_${RM_LIBRARY} ${DATA_DIR}/chimeras/chimeric_${RM_LIBRARY} > ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite
 else
+    mkdir -p ${DATA_DIR}/chimeras/
     touch ${DATA_DIR}/chimeras/rinsed_${RM_LIBRARY}.nonsatellite
 fi
 
