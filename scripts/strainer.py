@@ -28,7 +28,8 @@ def splitter(in_seq, out_dir):
 def rpstblastn(blast_headers, cdd_database, seq_path):
     from os import system
     rps_cmd='rpstblastn -query '+seq_path+' -db '+cdd_database+' -out '+seq_path+'.rps.out -outfmt \"6 '+blast_headers+'\" -evalue 0.01 -num_threads 1'
-    system(rps_cmd)
+    print(rps_cmd)
+    # system(rps_cmd)
 
 def library_strainer(reference_path, rps_out, in_seq_path):
     import pandas as pd
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                         help='FASTA file containing in sequences')
     parser.add_argument('-o', '--out_dir', type=str, required=True,
                         help='Path to file to write and compile rps out into')
-    parser.add_argument('-b', '--blast_headers', type=str, default='\'qseqid qstart qend qlen slen length evalue bitscore stitle\'',
+    parser.add_argument('-b', '--blast_headers', type=str, default='qseqid qstart qend qlen slen length evalue bitscore stitle',
                         help='BLAST outfmt 6 variables to use')
     parser.add_argument('-r', '--reference', type=str, default='data/acceptable_domains_2.tsv',
                         help='Reference tsv of TE typical protein domains')
@@ -119,23 +120,23 @@ if __name__ == "__main__":
     
     print('Performing RPSTBLAST')
     with Pool(processes=args.num_threads) as pool:
-        rpstblastn_func = partial(rpstblastn, args.database, args.blast_headers)
+        rpstblastn_func = partial(rpstblastn, args.blast_headers, args.database)
         max_ = len(file_list)
         with tqdm.tqdm(total=max_) as pbar:
             for _ in pool.imap_unordered(rpstblastn_func, file_list):
                 pbar.update()
 
-    # compile rpsblast output with header
-    print('Compiling RPSTBLAST output')
-    with open(args.in_seq+'.rps.out', 'w') as tsv:
-        tsv.write(sub(' ', '\t', args.blast_headers)+'\n')
-        for file in file_list:
-            with open(file+'.rps.out', 'r') as rps:
-                for line in rps:
-                    tsv.write(line)
-            remove(file)
-            remove(file+'.rps.out')
+    # # compile rpsblast output with header
+    # print('Compiling RPSTBLAST output')
+    # with open(args.in_seq+'.rps.out', 'w') as tsv:
+    #     tsv.write(sub(' ', '\t', args.blast_headers)+'\n')
+    #     for file in file_list:
+    #         with open(file+'.rps.out', 'r') as rps:
+    #             for line in rps:
+    #                 tsv.write(line)
+    #         remove(file)
+    #         remove(file+'.rps.out')
     
-    # strain library
-    if(args.strain is True):
-        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
+    # # strain library
+    # if(args.strain is True):
+    #     only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
