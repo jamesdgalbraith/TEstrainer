@@ -102,7 +102,7 @@ if __name__ == "__main__":
                         help='Set to run strainer')
     parser.add_argument('-t', '--num_threads', type=int, default=4,
                         help='Number of cores to use (default 4)')
-    parser.add_argument('-d', '--database', type=str, default = '/ceph/software/databases/cdd',
+    parser.add_argument('-d', '--database', type=str, default = '/ceph/software/databases/cdd/Cdd',
                         help="Full path to NCBI CDD database (default setup for Club Ashworth)")
     args = parser.parse_args()
 
