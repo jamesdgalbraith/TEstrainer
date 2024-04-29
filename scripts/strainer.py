@@ -73,12 +73,13 @@ def library_strainer(reference_path, rps_out, in_seq_path):
                 else:
                     SeqIO.write(record, clean, "fasta")
     return(only_not_acceptable_set)
-
+    
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
     from pathlib import Path
     from os.path import exists
+    from os import remove
     from re import sub
     from Bio import SeqIO
     from multiprocessing import Pool
@@ -132,6 +133,8 @@ if __name__ == "__main__":
             with open(file+'.rps.out', 'r') as rps:
                 for line in rps:
                     tsv.write(line)
+            remove(file)
+            remove(file+'.rps.out')
     
     # strain library
     if(args.strain is True):
