@@ -119,7 +119,7 @@ if __name__ == "__main__":
     
     print('Performing RPSTBLAST')
     with Pool(processes=args.num_threads) as pool:
-        rpstblastn_func = partial(rpstblastn, args.cdd_database, args.blast_headers)
+        rpstblastn_func = partial(rpstblastn, args.database, args.blast_headers)
         max_ = len(file_list)
         with tqdm.tqdm(total=max_) as pbar:
             for _ in pool.imap_unordered(rpstblastn_func, file_list):
