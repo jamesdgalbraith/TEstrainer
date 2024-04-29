@@ -36,9 +36,10 @@ def library_strainer(reference_path, rps_out, in_seq_path):
     acceptable_df = pd.read_table(reference_path)
     # Read in rps blast results, filter small hits, split stitle
     rps_out_df = pd.read_table(rps_out)
-    rps_out_df = rps_out_df.query('length/slen >= 0.5')
-    rps_out_df[['ref', 'abbrev', 'full']] = rps_out_df['stitle'].str.split(', ', n=2, expand = True)
+    rps_out_df = rps_out_df.query('length/slen >= 0.5').copy()
     rps_out_df = rps_out_df.reset_index(drop=True)
+    rps_out_df[['ref', 'abbrev', 'full']] = rps_out_df['stitle'].str.split(', ', n=2, expand = True)
+    
     # Split into hits in acceptable and hits not in acceptable
     contains_acceptable_df = rps_out_df[rps_out_df['ref'].isin(acceptable_df['ref'] )].copy()
     contains_not_acceptable_df = rps_out_df[~rps_out_df['ref'].isin(acceptable_df['ref'] )].copy()
@@ -50,14 +51,15 @@ def library_strainer(reference_path, rps_out, in_seq_path):
     chimeric_acceptable['state'] = 'acceptable'
     chimeric_not_acceptable = contains_not_acceptable_df[contains_not_acceptable_df['qseqid'].isin(contains_acceptable_df['qseqid'] )].copy()
     chimeric_not_acceptable['state'] = 'not_acceptable'
-    chimeric = pd.concat([chimeric_acceptable, chimeric_not_acceptable]).reset_index(drop = True)
+    chimeric = pd.concat([chimeric_acceptable.reset_index(drop = True), chimeric_not_acceptable.reset_index(drop = True)]).reset_index(drop = True)
     # Make sets
     only_acceptable_set = set(only_acceptable['qseqid'])
     only_not_acceptable_set = set(only_not_acceptable['qseqid'])
     chimeric_set = set(chimeric['qseqid'])
     # sort and write chimeric rps data to file
-    chimeric = chimeric.sort_values('qseqid', 'qstart')
-    chimeric.to_csv('chimeras_'+rps_out, sep="\t", index=False)
+    chimeric = chimeric.sort_values(by=['qseqid', 'qstart'])
+    chimeric_path="/".join(rps_out.split("/")[0:-1])+"/chimeric_"+rps_out.split("/")[-1]
+    chimeric.to_csv(chimeric_path, sep="\t", index=False)
 
     # Split library into clean and dirty
     with open(in_seq_path, 'r') as handle:
@@ -113,6 +115,7 @@ if __name__ == "__main__":
     #     if(args.in_gff == '' or exists(args.in_gff) == False):
     #         sys.exit('If running strainer GFF must be provided')
 
+    print('Path check')
     path_setup(args.out_dir)
 
     file_list=splitter(args.in_seq, args.out_dir)
@@ -138,4 +141,5 @@ if __name__ == "__main__":
     
     # strain library
     if(args.strain is True):
+        print('Straining library')
         only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
