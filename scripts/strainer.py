@@ -30,7 +30,7 @@ def rpstblastn(blast_headers, cdd_database, seq_path):
     rps_cmd='rpstblastn -query '+seq_path+' -db '+cdd_database+' -out '+seq_path+'.rps.out -outfmt \"6 '+blast_headers+'\" -evalue 0.01 -num_threads 1'
     system(rps_cmd)
 
-def library_strainer(reference_path, rps_out, in_seq_path):
+def library_strainer(reference_path, rps_out, in_seq_path, out_dir):
     import pandas as pd
     # Read in database of acceptable hits
     acceptable_df = pd.read_table(reference_path)
@@ -62,10 +62,11 @@ def library_strainer(reference_path, rps_out, in_seq_path):
     chimeric.to_csv(chimeric_path, sep="\t", index=False)
 
     # Split library into clean and dirty
+    out_seq_path=out_dir+"/"+str(in_seq_path.split("/")[-1])
     with open(in_seq_path, 'r') as handle:
-        with open(in_seq_path+'.clean', 'w') as clean, \
-            open(in_seq_path+'.dirty', 'w') as dirty, \
-            open(in_seq_path+'.chimeric', 'w') as chimeric:
+        with open(out_seq_path+'.clean', 'w') as clean, \
+            open(out_seq_path+'.dirty', 'w') as dirty, \
+            open(out_seq_path+'.chimeric', 'w') as chimeric:
             for record in SeqIO.parse(handle, "fasta"):
                 if record.id in only_not_acceptable_set:
                     SeqIO.write(record, dirty, "fasta")
@@ -142,4 +143,4 @@ if __name__ == "__main__":
     # strain library
     if(args.strain is True):
         print('Straining library')
-        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
+        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq, args.out_dir)
