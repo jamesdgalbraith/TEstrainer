@@ -140,6 +140,10 @@ if __name__ == "__main__":
             remove(file)
             remove(file+'.rps.out')
     
+    # Remove split file and folder
+    remove(args.out_dir+"/split/"+sub('.*/', '', args.in_seq)+"_split.txt")
+    # Path.rmdir(args.out_dir+"/split/")
+
     # strain library
     if(args.strain is True):
         print('Straining library')
