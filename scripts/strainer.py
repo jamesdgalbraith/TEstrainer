@@ -28,8 +28,7 @@ def splitter(in_seq, out_dir):
 def rpstblastn(blast_headers, cdd_database, seq_path):
     from os import system
     rps_cmd='rpstblastn -query '+seq_path+' -db '+cdd_database+' -out '+seq_path+'.rps.out -outfmt \"6 '+blast_headers+'\" -evalue 0.01 -num_threads 1'
-    print(rps_cmd)
-    # system(rps_cmd)
+    system(rps_cmd)
 
 def library_strainer(reference_path, rps_out, in_seq_path):
     import pandas as pd
@@ -126,17 +125,17 @@ if __name__ == "__main__":
             for _ in pool.imap_unordered(rpstblastn_func, file_list):
                 pbar.update()
 
-    # # compile rpsblast output with header
-    # print('Compiling RPSTBLAST output')
-    # with open(args.in_seq+'.rps.out', 'w') as tsv:
-    #     tsv.write(sub(' ', '\t', args.blast_headers)+'\n')
-    #     for file in file_list:
-    #         with open(file+'.rps.out', 'r') as rps:
-    #             for line in rps:
-    #                 tsv.write(line)
-    #         remove(file)
-    #         remove(file+'.rps.out')
+    # compile rpsblast output with header
+    print('Compiling RPSTBLAST output')
+    with open(args.in_seq+'.rps.out', 'w') as tsv:
+        tsv.write(sub(' ', '\t', args.blast_headers)+'\n')
+        for file in file_list:
+            with open(file+'.rps.out', 'r') as rps:
+                for line in rps:
+                    tsv.write(line)
+            remove(file)
+            remove(file+'.rps.out')
     
-    # # strain library
-    # if(args.strain is True):
-    #     only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
+    # strain library
+    if(args.strain is True):
+        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
