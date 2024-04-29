@@ -92,7 +92,7 @@ if __name__ == "__main__":
                         help='FASTA file containing in sequences')
     parser.add_argument('-o', '--out_dir', type=str, required=True,
                         help='Path to file to write and compile rps out into')
-    parser.add_argument('-b', '--blast_headers', type=str, default='qseqid qstart qend qlen slen length evalue bitscore stitle',
+    parser.add_argument('-b', '--blast_headers', type=str, default='\'qseqid qstart qend qlen slen length evalue bitscore stitle\'',
                         help='BLAST outfmt 6 variables to use')
     parser.add_argument('-r', '--reference', type=str, default='data/acceptable_domains_2.tsv',
                         help='Reference tsv of TE typical protein domains')
