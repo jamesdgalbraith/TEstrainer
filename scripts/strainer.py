@@ -108,9 +108,9 @@ if __name__ == "__main__":
     if(exists(args.in_seq) == False):
         sys.exit('In sequence file not found')
 
-    if(args.strain is True):
-        if(args.in_gff == '' or exists(args.in_gff) == False):
-            sys.exit('If running strainer GFF must be provided')
+    # if(args.strain is True):
+    #     if(args.in_gff == '' or exists(args.in_gff) == False):
+    #         sys.exit('If running strainer GFF must be provided')
 
     path_setup(args.out_dir)
 
