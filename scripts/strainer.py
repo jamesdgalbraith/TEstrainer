@@ -138,4 +138,4 @@ if __name__ == "__main__":
     
     # strain library
     if(args.strain is True):
-        only_not_acceptable = library_strainer(args.reference_path, args.in_seq+'.rps.out', args.in_seq)
+        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq)
