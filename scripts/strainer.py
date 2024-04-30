@@ -88,7 +88,7 @@ def strain_gff(in_gff, out_dir, unacceptable_list):
         dirty_list.append(sub("#.*", "", entry).lower())
     
     in_gff_name = in_gff.split('/')[-1]
-    out_gff = out_dir + '.'.join(in_gff_name.split('.')[0:-1]) + ".strained." + in_gff_name.split('.')[-1]
+    out_gff = out_dir+'/'+ '.'.join(in_gff_name.split('.')[0:-1]) + ".strained." + in_gff_name.split('.')[-1]
 
     # Write new copy of gff
     with open(out_gff, 'w') as out_path:
