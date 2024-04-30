@@ -30,10 +30,12 @@ def rpstblastn(blast_headers, cdd_database, seq_path):
     rps_cmd='rpstblastn -query '+seq_path+' -db '+cdd_database+' -out '+seq_path+'.rps.out -outfmt \"6 '+blast_headers+'\" -evalue 0.01 -num_threads 1'
     system(rps_cmd)
 
-def library_strainer(reference_path, rps_out, in_seq_path, out_dir):
+def library_strainer(reference_path, additional_path, rps_out, in_seq_path, out_dir):
     import pandas as pd
     # Read in database of acceptable hits
     acceptable_df = pd.read_table(reference_path)
+    additional_df = pd.read_table(additional_path)
+    acceptable_domains_set = set(list(acceptable_df['ref']) + list(additional_df['ref']))
     # Read in rps blast results, filter small hits, split stitle
     rps_out_df = pd.read_table(rps_out)
     rps_out_df = rps_out_df.query('length/slen >= 0.5').copy()
@@ -41,8 +43,8 @@ def library_strainer(reference_path, rps_out, in_seq_path, out_dir):
     rps_out_df[['ref', 'abbrev', 'full']] = rps_out_df['stitle'].str.split(', ', n=2, expand = True)
     
     # Split into hits in acceptable and hits not in acceptable
-    contains_acceptable_df = rps_out_df[rps_out_df['ref'].isin(acceptable_df['ref'] )].copy()
-    contains_not_acceptable_df = rps_out_df[~rps_out_df['ref'].isin(acceptable_df['ref'] )].copy()
+    contains_acceptable_df = rps_out_df[rps_out_df['ref'].isin(acceptable_domains_set)].copy()
+    contains_not_acceptable_df = rps_out_df[~rps_out_df['ref'].isin(acceptable_domains_set)].copy()
     # Split out only acceptable and only not in acceptable
     only_acceptable = contains_acceptable_df[~contains_acceptable_df['qseqid'].isin(contains_not_acceptable_df['qseqid'] )].copy()
     only_not_acceptable = contains_not_acceptable_df[~contains_not_acceptable_df['qseqid'].isin(contains_acceptable_df['qseqid'] )].copy()
@@ -120,6 +122,8 @@ if __name__ == "__main__":
                         help='BLAST outfmt 6 variables to use')
     parser.add_argument('-r', '--reference', type=str, default='data/acceptable_domains_2.tsv',
                         help='Reference tsv of TE typical protein domains')
+    parser.add_argument('-a', '--additional_reference', type=str, default='data/additional_domains_2.tsv',
+                        help='Additional custom reference tsv of TE typical protein domains')
     parser.add_argument('-g', '--in_gff', type=str,
                         help='Path to gff to strain')
     parser.add_argument('-s', '--strain', action='store_true',
@@ -164,7 +168,7 @@ if __name__ == "__main__":
     # strain library
     if(args.strain is True):
         print('Straining library')
-        only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq, args.out_dir)
+        only_not_acceptable = library_strainer(args.reference, args.additional_reference, args.in_seq+'.rps.out', args.in_seq, args.out_dir)
         
         if args.in_gff is None:
             print('Path to GFF not be provided, skipping step.')
