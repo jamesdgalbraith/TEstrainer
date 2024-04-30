@@ -58,7 +58,10 @@ def library_strainer(reference_path, rps_out, in_seq_path, out_dir):
     chimeric_set = set(chimeric['qseqid'])
     # sort and write chimeric rps data to file
     chimeric = chimeric.sort_values(by=['qseqid', 'qstart'])
-    chimeric_path="/".join(rps_out.split("/")[0:-1])+"/chimeric_"+rps_out.split("/")[-1]
+    if rps_out.count("/") > 0:
+        chimeric_path=out_dir+"/chimeric_"+rps_out.split("/")[-1]
+    else:
+        chimeric_path=out_dir+"chimeric_"+rps_out
     chimeric.to_csv(chimeric_path, sep="\t", index=False)
 
     # Split library into clean and dirty
@@ -76,13 +79,31 @@ def library_strainer(reference_path, rps_out, in_seq_path, out_dir):
                 else:
                     SeqIO.write(record, clean, "fasta")
     return(only_not_acceptable_set)
+
+def strain_gff(in_gff, out_dir, unacceptable_list):
+    
+    # Modify names of dirty list
+    dirty_list=[]
+    for entry in unacceptable_list:
+        dirty_list.append(sub("#.*", "", entry).lower())
+    
+    in_gff_name = in_gff.split('/')[-1]
+    out_gff = out_dir + '.'.join(in_gff_name.split('.')[0:-1]) + ".strained." + in_gff_name.split('.')[-1]
+
+    # Write new copy of gff
+    with open(out_gff, 'w') as out_path:
+        with open(in_gff, 'r') as record:
+            for line in record:
+                family = sub('ID=', '', line.split('\t')[8].split(';')[2]).lower()
+                if family not in dirty_list:
+                    out_path.write(line)
     
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
     from pathlib import Path
     from os.path import exists
-    from os import remove
+    from os import remove, rmdir
     from re import sub
     from Bio import SeqIO
     from multiprocessing import Pool
@@ -99,7 +120,7 @@ if __name__ == "__main__":
                         help='BLAST outfmt 6 variables to use')
     parser.add_argument('-r', '--reference', type=str, default='data/acceptable_domains_2.tsv',
                         help='Reference tsv of TE typical protein domains')
-    parser.add_argument('-g', '--in_gff', type=str, default='',
+    parser.add_argument('-g', '--in_gff', type=str,
                         help='Path to gff to strain')
     parser.add_argument('-s', '--strain', action='store_true',
                         help='Set to run strainer')
@@ -140,11 +161,21 @@ if __name__ == "__main__":
             remove(file)
             remove(file+'.rps.out')
     
-    # Remove split file and folder
-    remove(args.out_dir+"/split/"+sub('.*/', '', args.in_seq)+"_split.txt")
-    # Path.rmdir(args.out_dir+"/split/")
-
     # strain library
     if(args.strain is True):
         print('Straining library')
         only_not_acceptable = library_strainer(args.reference, args.in_seq+'.rps.out', args.in_seq, args.out_dir)
+        
+        if args.in_gff is None:
+            print('Path to GFF not be provided, skipping step.')
+        elif exists(args.in_gff) is False:
+            print('GFF not found, skipping step.')
+        else:
+            print('Straining gff')
+            strain_gff(args.in_gff, args.out_dir, only_not_acceptable)
+
+    # Remove split file and folder
+    remove(args.out_dir+"/split/"+sub('.*/', '', args.in_seq)+"_split.txt")
+    rmdir(args.out_dir+"/split/")
+
+    
