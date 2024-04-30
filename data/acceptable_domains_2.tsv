@@ -42,6 +42,7 @@ RnhA	COG0328	Ribonuclease HI [DNA replication	LINE
 RNase_HI_prokaryote_like	cd09278	RNase HI family found mainly in prokaryotes.  Ribonuclease H (RNase H) is classified into two evolutionarily unrelated families	LINE
 RNase_HI_like	cd09279	RNAse HI family that includes archaeal	LINE
 UPF0029	pfam01205	Uncharacterized protein family UPF0029.	LINE
+DUF4780	pfam16012	Domain of unknown function (DUF4780).  This presumed domain is functionally uncharacterized. This domain family is found in eukaryotes	LINE
 PRE_C2HC	pfam07530	Associated with zinc fingers.  This function of this domain is unknown and is often found associated with pfam00096.	LINE
 PRE_C2HC	smart00596	PRE_C2HC domain.	LINE
 rnhA	PRK00203	ribonuclease H; Reviewed.	LINE
@@ -82,6 +83,7 @@ RNase_HI_bacteria_like	cd09277	Bacterial RNase HI containing a hybrid binding do
 DUF1891	pfam09004	Domain of unknown function (DUF1891).  This domain is found in a set of hypothetical eukaryotic proteins.	LINE
 MnuA_DNase1-like	cd10283	Mycoplasma pulmonis MnuA nuclease-like.  This subfamily includes Mycoplasma pulmonis MnuA	LINE
 NnaC_like	cd01841	NnaC (CMP-NeuNAc synthetase) _like subfamily of SGNH_hydrolases	LINE
+ZapB	pfam06005	Cell division protein ZapB.  ZapB is a non-essential	LINE
 hypothetical_protein	TIGR03033	putative phage-type endonuclease.  Members of this protein family are found often in phage genomes and in prokaryotic genomes in uncharacterized regions that resemble integrated prophage regions.	LINE
 ElsH	COG3568	Metal-dependent hydrolase [General function prediction only].	LINE
 RgfB-like	cd09079	Streptococcus agalactiae RgfB	LINE
@@ -101,6 +103,7 @@ RT_LTR	cd01647	RT_LTR: Reverse transcriptases (RTs) from retrotransposons and re
 Smc	COG1196	Chromosome segregation ATPases [Cell division and chromosome partitioning].	LINE
 RNase_HI_RT_DIRS1	cd09275	DIRS1 family of RNase HI in long-term repeat retroelements.  Ribonuclease H (RNase H) enzymes are divided into two major families	LINE
 RNase_H_Dikarya_like	cd13934	Fungal (dikarya) Ribonuclease H	LINE
+DUF2205	pfam10224	Predicted coiled-coil protein (DUF2205).  This entry represent a highly conserved 100 residue region which is likely to be a coiled-coil structure. The exact function is unknown.	LINE
 RRM2_PES4_MIP6	cd21602	RNA recognition motif 2 (RRM2) found in Saccharomyces cerevisiae protein PES4	LINE
 COG4026	COG4026	Uncharacterized protein containing TOPRIM domain	LINE
 RT_DIRS1	cd03714	RT_DIRS1: Reverse transcriptases (RTs) occurring in the DIRS1 group of retransposons. Members of the subfamily include the Dictyostelium DIRS-1	LINE
@@ -147,6 +150,7 @@ PHD6_KMT2C	cd15600	PHD finger 6 found in Histone-lysine N-methyltransferase 2C (
 COG1739	COG1739	Uncharacterized conserved protein [Function unknown].	LINE
 RING-CH-C4HC3_NFX1-like	cd16492	RING-CH finger	LINE
 PRK07708	PRK07708	hypothetical protein; Validated.	LINE
+geminin_CC	cd22589	central coiled-coil domain of geminin.  Geminin	LINE
 PHD_MMD1_like	cd15556	PHD finger found in Arabidopsis thaliana PHD finger protein MALE MEIOCYTE DEATH 1 (MMD1)	LINE
 PHD3_KDM5B	cd15687	PHD finger 3 found in lysine-specific demethylase 5B (KDM5B).  KDM5B	LINE
 RPL36A	COG5051	Ribosomal protein L36E [Translation	LINE
@@ -277,6 +281,7 @@ INT_Cre_C	cd00799	C-terminal catalytic domain of Cre recombinase (also called in
 DNA_BRE_C	cd00397	DNA breaking-rejoining enzymes	LTR
 SF1_C_Upf1	cd18808	C-terminal helicase domain of Upf1-like family helicases.  The Upf1-like helicase family includes UPF1	LTR
 AAA_12	pfam13087	AAA domain.  This family of domains contain a P-loop motif that is characteristic of the AAA superfamily. Many of the proteins in this family are conjugative transfer proteins.	LTR
+CoV_Nsp13-helicase	cd21718	helicase domain of coronavirus non-structural protein 13.  This model represents the helicase domain of non-structural protein 13 (Nsp13) from alpha-	LTR
 PHA02517	PHA02517	putative transposase OrfB; Reviewed.	LTR
 Retrotrans_gag	pfam03732	Retrotransposon gag protein.  Gag or Capsid-like proteins from LTR retrotransposons. There is a central motif QGXXEXXXXXFXXLXXH that is common to Retroviridae gag-proteins	LTR
 PNMA	pfam14893	PNMA.  The PNMA family includes paraneoplastic antigens Ma 1	LTR
@@ -347,7 +352,6 @@ rnhA	PRK13907	ribonuclease H; Provisional.	LTR
 CD_POL_like	cd18979	chromodomain of a Zea maize putative metaviridae (gypsy-type) retrotransposon polyproteins (Z195D10.9)	LTR
 INT_C_like_4	cd01194	Uncharacterized site-specific tyrosine recombinase	LTR
 deltaCoV_Nsp13-helicase	cd21721	helicase domain of deltacoronavirus non-structural protein 13.  This model represents the helicase domain of non-structural protein 13 (Nsp13) from deltacoronavirus	LTR
-CoV_Nsp13-helicase	cd21718	helicase domain of coronavirus non-structural protein 13.  This model represents the helicase domain of non-structural protein 13 (Nsp13) from alpha-	LTR
 gammaCoV_Nsp13-helicase	cd21720	helicase domain of gammacoronavirus non-structural protein 13.  This model represents the helicase domain of non-structural protein 13 (Nsp13) from gammacoronavirus	LTR
 INT_C_like_3	cd01192	Uncharacterized site-specific tyrosine recombinase	LTR
 EEXXEc_NFX1	cd17936	EEXXE-box helicase domain of NFX1.  Human NFX1 protein was identified as a protein that represses class II MHC (major histocompatibility complex) gene expression. NFX1 binds a conserved cis-acting element	LTR
@@ -381,8 +385,8 @@ Peptidase_A2B	pfam12384	Ty3 transposon peptidase.  Ty3 is a gypsy-type	LTR
 Phage_integrase	pfam00589	Phage integrase family.  Members of this family cleave DNA substrates by a series of staggered cuts	LTR
 PRK06548	PRK06548	ribonuclease H; Provisional.	LTR
 SF1_C_UvrD	cd18807	C-terminal helicase domain of UvrD family helicases.  UvrD is a highly conserved helicase involved in mismatch repair	LTR
-DEXDc	smart00487	DEAD-like helicases superfamily.	LTR
 DEXXQc_Helz-like	cd18038	DEXXQ/H-box helicase domain of Helz-like helicase.  This subfamily contains HELZ	LTR
+DEXDc	smart00487	DEAD-like helicases superfamily.	LTR
 transpos_IS30	NF033563	IS30 family transposase.	LTR
 Uncharacterized_protein_RP867	TIGR02281	clan AA aspartic protease	LTR
 COG5550	COG5550	Predicted aspartyl protease [Posttranslational modification	LTR
@@ -413,6 +417,7 @@ Lipoprotein_7	pfam01540	Adhesin lipoprotein.  This family consists of the p50 an
 KH_I_FMR1_FXR_rpt2	cd22426	second type I K homology (KH) RNA-binding domain found in a family of fragile X mental retardation protein (FMR1) and fragile X related (FXR) proteins.  The FMR1/FXR family includes FMR1 (also known as FMRP) and its two homologues	LTR
 PRK09409	PRK09409	IS2 transposase TnpB; Reviewed.	LTR
 COG3827	COG3827	Uncharacterized protein conserved in bacteria [Function unknown].	LTR
+rve	pfam00665	Integrase core domain.  Integrase mediates integration of a DNA copy of the viral genome into the host chromosome. Integrase is composed of three domains. The amino-terminal domain is a zinc binding domain pfam02022. This domain is the central catalytic domain. The carboxyl terminal domain that is a non-specific DNA binding domain pfam00552. The catalytic domain acts as an endonuclease when two nucleotides are removed from the 3' ends of the blunt-ended viral DNA made by reverse transcription. This domain also catalyzes the DNA strand transfer reaction of the 3' ends of the viral DNA to the 5' ends of the integration site.	DNA
 DDE_1	pfam03184	DDE superfamily endonuclease.  This family of proteins are related to pfam00665 and are probably endonucleases of the DDE superfamily. Transposase proteins are necessary for efficient DNA transposition. This domain is a member of the DDE superfamily	DNA
 CENP-B_N	pfam04218	CENP-B N-terminal DNA-binding domain.  Centromere Protein B (CENP-B) is a DNA-binding protein localized to the centromere. Within the N-terminal 125 residues	DNA
 CENPB	smart00674	Putative DNA-binding domain in centromere protein B	DNA
@@ -428,6 +433,7 @@ DDE_Tnp_4	pfam13359	DDE superfamily endonuclease.  This family of proteins are r
 PHD	pfam00628	PHD-finger.  PHD folds into an interleaved type of Zn-finger chelating 2 Zn ions in a similar manner to that of the RING and FYVE domains. Several PHD fingers have been identified as binding modules of methylated histone H3.	DNA
 PHD_TCF19_like	cd15517	PHD finger found in Transcription factor 19 (TCF-19)	DNA
 PHD	smart00249	PHD zinc finger.  The plant homeodomain (PHD) finger is a C4HC3 zinc-finger-like motif found in nuclear proteins thought to be involved in epigenetics and chromatin-mediated transcriptional regulation. The PHD finger binds two zinc ions using the so-called 'cross-brace' motif and is thus structurally related to the RING finger and the FYVE finger. It is not yet known if PHD fingers have a common molecular function. Several reports suggest that it can function as a protein-protein interacton domain and it was recently demonstrated that the PHD finger of p300 can cooperate with the adjacent BROMO domain in nucleosome binding in vitro. Other reports suggesting that the PHD finger is a ubiquitin ligase have been refuted as these domains were RING fingers misidentified as PHD fingers.	DNA
+PHD_SF	cd15489	PHD finger superfamily.  The PHD finger superfamily includes a canonical plant homeodomain (PHD) finger typically characterized as Cys4HisCys3	DNA
 THAP	pfam05485	THAP domain.  The THAP domain is a putative DNA-binding domain (DBD) and probably also binds a zinc ion. It features the conserved C2CH architecture (consensus sequence: Cys - 2-4 residues - Cys - 35-50 residues - Cys - 2 residues - His). Other universal features include the location of the domain at the N-termini of proteins	DNA
 Dimer_Tnp_hAT	pfam05699	hAT family C-terminal dimerization region.  This dimerization region is found at the C-terminus of the transposases of elements belonging to the Activator superfamily (hAT element superfamily). The isolated dimerization region forms extremely stable dimers in vitro.	DNA
 zf-BED	pfam02892	BED zinc finger.	DNA
@@ -444,6 +450,7 @@ ZnF_TTF	smart00597	zinc finger in transposases and transcription factors.	DNA
 COG3335	COG3335	Transposase and inactivated derivatives [DNA replication	DNA
 THAP	smart00980	The THAP domain is a putative DNA-binding domain (DBD) and probably also binds a zinc ion.  It features the conserved C2CH architecture (consensus sequence: Cys - 2-4 residues - Cys - 35-50 residues - Cys - 2 residues - His). Other universal features include the location of the domain at the N-termini of proteins	DNA
 DDE_Tnp_1_7	pfam13843	Transposase IS4.	DNA
+PHD3_KDM5A_like	cd15610	PHD finger 3 found in Lysine-specific demethylase 5A (KDM5A)	DNA
 DUF659	pfam04937	Protein of unknown function (DUF 659).  Transposase-like protein with no known function.	DNA
 Transp_Tc5_C	pfam04236	Tc5 transposase C-terminal domain.  This family corresponds to a C-terminal cysteine rich region that probably binds to a metal ion and could be DNA binding (pers. obs. A Bateman).	DNA
 transpos_IS5_4	NF033581	IS5 family transposase.	DNA
@@ -457,79 +464,127 @@ zf-C2H2_12	pfam18658	Zinc-finger C2H2-type.  This is a zinc finger domain C2H2 t
 HTH_ARSR	cd00090	Arsenical Resistance Operon Repressor and similar prokaryotic	DNA
 HTH_23	pfam13384	Homeodomain-like domain.	DNA
 DUF4817	pfam16087	Domain of unknown function (DUF4817).  This family of proteins is functionally uncharacterized. This family of proteins is found in eukaryotes. Proteins in this family are typically between 109 and 322 amino acids in length. There are two completely conserved residues (G and R) that may be functionally important.	DNA
+Tnp_P_element	pfam12017	Transposase protein.  Protein in this family are transposases found in insects. This region is about 230 amino acids in length and is found associated with pfam05485.	DNA
 DM3	smart00692	Zinc finger domain in CG10631	DNA
 HTH_psq	pfam05225	helix-turn-helix	DNA
 BrkDBD	pfam09607	Brinker DNA-binding domain.  This DNA-binding domain is the first approx. 100 residues of the N-terminal end of Brinker. The structure of this domain in complex with DNA consists of four alpha-helices that contain a helix-turn-helix DNA recognition motif specific for GC-rich DNA. The Brinker nuclear repressor is a major element of the Drosophila Decapentaplegic morphogen signalling pathway.	DNA
+CD_POL_like	cd18970	chromodomain of Hypsizygus marmoreus TY3B-I_0 protein	DNA
+chromodomain	cd18966	CHROMO (CHRromatin Organization Modifier) domain; uncharacterized subgroup.  The chromodomain is a conserved region of about 50 amino acids	DNA
+chromodomain	cd18968	CHROMO (CHRromatin Organization Modifier) domain; uncharacterized subgroup.  The chromodomain is a conserved region of about 50 amino acids	DNA
+CD_POL_like	cd18976	chromodomain of uncharacterized putative retroelement polyprotein proteins.  This subgroup includes the CHROMO (CHRromatin Organization Modifier) domain found in  uncharacterized putative retrotransposon proteins	DNA
+chromodomain	cd18965	CHROMO (CHRromatin Organization Modifier) domain; uncharacterized subgroup.  The chromodomain is a conserved region of about 50 amino acids	DNA
+chromodomain	cd18964	CHROMO (CHRromatin Organization Modifier) domain; uncharacterized subgroup.  The chromodomain is a conserved region of about 50 amino acids	DNA
+chromodomain	cd18969	CHROMO (CHRromatin Organization Modifier) domain; uncharacterized subgroup; for most members of this subgroup	DNA
+CD_POL_like	cd18971	chromodomain of a Magnaporthe grisea putative retrotransposon polyprotein	DNA
 HTH_LUXR	smart00421	helix_turn_helix	DNA
 HTH_ARSR	smart00418	helix_turn_helix	DNA
 HTH_38	pfam13936	Helix-turn-helix domain.  This helix-turn-helix domain is often found in transferases and is likely to be DNA-binding.	DNA
 HTH_Hin_like	cd00569	Helix-turn-helix domain of Hin and related proteins.  This domain model summarizes a family of DNA-binding domains unique to bacteria and represented by the Hin protein of Salmonella. The basic HTH domain is a simple fold comprised of three core helices that form a right-handed helical bundle. The principal DNA-protein interface is formed by the third helix	DNA
+HTH_10	pfam04967	HTH DNA binding domain.	DNA
+Tnp_P_element_C	pfam12596	87kDa Transposase.  This domain family is found in eukaryotes	DNA
 HTH_Tnp_4	pfam13613	Helix-turn-helix of DDE superfamily endonuclease.  This domain is the probable DNA-binding region of transposase enzymes	DNA
+DDE_Tnp_1	pfam01609	Transposase DDE domain.  Transposase proteins are necessary for efficient DNA transposition. This domain is a member of the DDE superfamily	DNA
+CD_POL_like	cd18974	chromodomain of Penicillium solitum protein PENSOL_c198G03123.  This subgroup includes the CHROMO (CHRromatin Organization Modifier) domain found in Penicillium solitum protein PENSOL_c198G03123 a putative polyprotein from a Ty3/Gypsy long terminal repeat (LTR) retroelement. The pol gene in TY3/gypsy elements generally encodes domains in the following order: an aspartyl protease	DNA
+CD_POL_like	cd18977	chromodomain of a Rhizoctonia solani AG-3 Rhs1AP polyprotein	DNA
+HTH_ABP1_N	pfam18107	Fission yeast centromere protein N-terminal domain.  This domain is found in the fission yeast centromere protein (Abp1) in species such as Shizosaccharomyces pombe. The domain	DNA
+Plant_tran	pfam04827	Plant transposon protein.  This family contains plant transposases which are putative members of the PIF / Ping-Pong family.	DNA
 PDDEXK_lambda_exonuclease-like	cd22343	Uncharacterized nucleases similar to lambda phage exonuclease.  This model characterizes a diverse set of nucleases such as alkaline exonuclease from Laribacter hongkongensis	DNA
 YqaJ	pfam09588	YqaJ-like viral recombinase domain.  This protein family is found in many different bacterial species but is of viral origin. The protein forms an oligomer and functions as a processive alkaline exonuclease that digests linear double-stranded DNA in a Mg(2+)-dependent reaction	DNA
 hypothetical_protein	TIGR03033	putative phage-type endonuclease.  Members of this protein family are found often in phage genomes and in prokaryotic genomes in uncharacterized regions that resemble integrated prophage regions.	DNA
+OTU	cd22744	OTU (ovarian tumor) domain family.  The OTU family of cysteine proteases use a conserved cysteine and histidine	DNA
+OTU	pfam02338	OTU-like cysteine protease.  This family is comprised of a group of predicted cysteine proteases	DNA
+HTH_Tnp_1	pfam01527	Transposase.  Transposase proteins are necessary for efficient DNA transposition. This family consists of various E. coli insertion elements and other bacterial transposases some of which are members of the IS3 family.	DNA
+Myb_DNA-bind_5	pfam13873	Myb/SANT-like DNA-binding domain.  This presumed domain appears to be related to other Myb/SANT like DNA binding domains. This family is greatly expanded in arthropods and higher eukaryotes.	DNA
 HTH_7	pfam02796	Helix-turn-helix domain of resolvase.	DNA
+HTH_11	pfam08279	HTH domain.  This family includes helix-turn-helix domains in a wide variety of proteins.	DNA
+HTH_Tnp_IS630	pfam01710	Transposase.  Transposase proteins are necessary for efficient DNA transposition. This family includes insertion sequences from Synechocystis PCC 6803 three of which are characterized as homologous to bacterial IS5- and IS4- and to several members of the IS630-Tc1-mariner superfamily.	DNA
 transpos_IS1595	NF033547	IS1595 family transposase.  Most transposases of this family of transposases	DNA
 DDE_Tnp_IS1595	pfam12762	ISXO2-like transposase domain.  This domain probably functions as an integrase that is found in a wide variety of transposases	DNA
-PHD_SF	cd15489	PHD finger superfamily.  The PHD finger superfamily includes a canonical plant homeodomain (PHD) finger typically characterized as Cys4HisCys3	DNA
+MarR_2	pfam12802	MarR family.  The Mar proteins are involved in the multiple antibiotic resistance	DNA
+Sigma70_r4_2	pfam08281	Sigma-70	DNA
+TrmB	pfam01978	Sugar-specific transcriptional regulator TrmB.  One member of this family	DNA
+HTH_CRP	smart00419	helix_turn_helix	DNA
+Sigma70_r4	cd06171	Sigma70	DNA
+COG2963	COG2963	Transposase and inactivated derivatives [DNA replication	DNA
+CD_POL_like	cd18972	chromodomain of a Moniliophthora perniciosa FA553 putative retrotransposon polyprotein	DNA
+HTH_CRP	cd00092	helix_turn_helix	DNA
+zf-His_Me_endon	pfam05551	Zinc-binding loop region of homing endonuclease.  This domain is the short zinc-binding loops region of a number of much longer chain homing endonucleases. Such loops are probably stabilized by the zinc and may be viewed as small but separate domains. The common structural feature of these domains is that at least three zinc ligands lie very close to each other in the sequence and are not incorporated into regular secondary structural elements. The biological roles played by these small zinc-binding domains are presently unknown.	DNA
+CD_POL_like	cd18979	chromodomain of a Zea maize putative metaviridae (gypsy-type) retrotransposon polyproteins (Z195D10.9)	DNA
+Sigma70_r4	pfam04545	Sigma-70	DNA
 PHD_SHPRH	cd15547	PHD finger found in E3 ubiquitin-protein ligase SHPRH.  SHPRH	DNA
 PHD_ARID4_like	cd15615	PHD finger found in Arabidopsis thaliana AT-rich interactive domain-containing protein 4 (ARID4) and similar proteins.  This family includes A. thaliana ARID4 (ARID domain-containing protein 4) and similar proteins. Their biological roles remain unclear	DNA
 PHD_HAC_like	cd15614	PHD finger found in Arabidopsis thaliana histone acetyltransferases (HATs) HAC and similar proteins.  This family includes A. thaliana HACs (HAC1/2/4/5/12)	DNA
 HTH_metalloreg	NF033788	metalloregulator ArsR/SmtB family transcription factor.  Transcriptional repressors that sense toxic heavy metals such as arsenic or cadmium	DNA
-HTH_10	pfam04967	HTH DNA binding domain.	DNA
 Sybindin	pfam04099	Sybindin-like family.  Sybindin is a physiological syndecan-2 ligand on dendritic spines	DNA
 PRK04016	PRK04016	DNA-directed RNA polymerase subunit N; Provisional.	DNA
-DDE_Tnp_1	pfam01609	Transposase DDE domain.  Transposase proteins are necessary for efficient DNA transposition. This domain is a member of the DDE superfamily	DNA
+PHD5_NSD	cd15568	PHD finger 5 found in nuclear receptor-binding SET domain-containing (NSD) proteins.  The nuclear receptor binding SET domain (NSD) protein is a family of three HMTases	DNA
 Tra8	COG2826	Transposase and inactivated derivatives	DNA
 Fe_dep_repress	pfam01325	Iron dependent repressor	DNA
-Plant_tran	pfam04827	Plant transposon protein.  This family contains plant transposases which are putative members of the PIF / Ping-Pong family.	DNA
-HTH_Tnp_1	pfam01527	Transposase.  Transposase proteins are necessary for efficient DNA transposition. This family consists of various E. coli insertion elements and other bacterial transposases some of which are members of the IS3 family.	DNA
+OTU_plant_OTU7-like	cd22771	OTU (ovarian tumor) domain of Arabidopsis thaliana deubiquitinating enzyme OTU7 and similar proteins.  Arabidopsis thaliana deubiquitinating enzyme OTU7	DNA
+OTU_232R-like	cd22758	OTU (ovarian tumor) domain of Invertebrate iridescent virus putative ubiquitin thioesterase 232R and similar proteins.  This subfamily contains putative ubiquitin thioesterases 232R from Invertebrate iridescent virus and L96 from Tipula iridescent virus (TIV)	DNA
+OTU_OTUD3-like	cd22756	OTU (ovarian tumor) domain of OTU domain-containing protein 3 and similar proteins.  This subfamily includes bilaterial OTU domain-containing protein 3 (OTUD3)	DNA
+OTU_OTUD6-like	cd22748	OTU (ovarian tumor) domain of OTU domain-containing proteins 6A	DNA
+OTU_fungi_OTU2-like	cd22762	OTU (ovarian tumor) domain of fungal OTU domain-containing protein 2 and similar proteins.  This subfamily includes Schizosaccharomyces pombe and Saccharomyces cerevisiae OTU domain-containing protein 2 (OTU2) and similar proteins. S. pombe OTU2 is a ubiquitin thioesterase/hydrolase (EC 3.4.19.12) that can remove conjugated ubiquitin from protein substrates and may therefore play an important regulatory role at the level of protein turnover by preventing degradation. Fungal OTU2 bbelongs to the OTU family of cysteine proteases that use a conserved cysteine	DNA
+OTU_OTUD6	cd22761	OTU (ovarian tumor) domain of OTU domain-containing proteins 6A and 6B and similar proteins.  This subfamily is composed of mammalian OTU domain-containing protein 6A (OTUD6A	DNA
+OTU_plant_OTU9-like	cd22751	OTU (ovarian tumor) domain of plant deubiquitinating enzyme OTU9 and similar proteins.  This subfamily contains Arabidopsis thaliana deubiquitinating enzymes OTU8	DNA
+OTU_plant_OTU5-like	cd22797	OTU (ovarian tumor) domain of deubiquitinating enzyme OTU5 from plants and similar proteins.  Deubiquitinating enzyme OTU5	DNA
+OTU_OTUD5-like	cd22752	OTU (ovarian tumor) domain of OTU domain-containing protein 5 and similar proteins.  OTU domain-containing protein 5 (OTUD5)	DNA
+OTU_plant_OTU6-like	cd22796	OTU (ovarian tumor) domain of deubiquitinating enzyme OTU6 from plants and similar proteins.  Deubiquitinating enzyme OTU6	DNA
+OTU_CeDUB-like	cd22755	OTU (ovarian tumor) domain of Caenorhabditis elegans deubiquitylating enzyme with USP/UBP and OTU domains	DNA
+OTU_ALG13-like	cd22753	OTU (ovarian tumor) domain of bifunctional UDP-N-acetylglucosamine transferase and deubiquitinase ALG13 and similar proteins.  Bifunctional UDP-N-acetylglucosamine transferase and deubiquitinase ALG13 is alco called asparagine-linked glycosylation 13 homolog	DNA
 HTH_ASNC	smart00344	helix_turn_helix ASNC type.  AsnC: an autogenously regulated activator of asparagine synthetase A transcription in Escherichia coli).	DNA
-HTH_11	pfam08279	HTH domain.  This family includes helix-turn-helix domains in a wide variety of proteins.	DNA
 WHTH_GntR	cd07377	Winged helix-turn-helix (WHTH) DNA-binding domain of the GntR family of transcriptional regulators.  This CD represents the winged HTH DNA-binding domain of the GntR (named after the gluconate operon repressor in Bacillus subtilis) family of bacterial transcriptional regulators and their putative homologs found in eukaryota and archaea. The GntR family has over 6000 members distributed among almost all bacterial species	DNA
 TroR	COG1321	Mn-dependent transcriptional regulator [Transcription].	DNA
 COG1725	COG1725	Predicted transcriptional regulators [Transcription].	DNA
 HTH_DTXR	smart00529	Helix-turn-helix diphteria tox regulatory element.  iron dependent repressor.	DNA
 PHD_AL_plant	cd15613	PHD finger found in plant Alfin1-like (AL) proteins.  AL proteins are ubiquitously expressed nuclear proteins existing only in plants. They are involved in chromatin regulation by binding to tri- and dimethylated histone H3 at lysine 4 (H3K4me3/2)	DNA
 PHD_TAF3	cd15522	PHD finger found in transcription initiation factor TFIID subunit 3 (TAF3).  TAF3 (also termed 140 kDa TATA box-binding protein-associated factor	DNA
-HTH_Tnp_IS630	pfam01710	Transposase.  Transposase proteins are necessary for efficient DNA transposition. This family includes insertion sequences from Synechocystis PCC 6803 three of which are characterized as homologous to bacterial IS5- and IS4- and to several members of the IS630-Tc1-mariner superfamily.	DNA
-Sigma70_r4_2	pfam08281	Sigma-70	DNA
-MarR_2	pfam12802	MarR family.  The Mar proteins are involved in the multiple antibiotic resistance	DNA
-TrmB	pfam01978	Sugar-specific transcriptional regulator TrmB.  One member of this family	DNA
 HTH_Crp_2	pfam13545	Crp-like helix-turn-helix domain.  This family represents a crp-like helix-turn-helix domain that is likely to bind DNA.	DNA
 COG3355	COG3355	Predicted transcriptional regulator [Transcription].	DNA
 MarR	COG1846	Transcriptional regulators [Transcription].	DNA
 HTH_MARR	smart00347	helix_turn_helix multiple antibiotic resistance protein.	DNA
-HTH_CRP	smart00419	helix_turn_helix	DNA
 COG2522	COG2522	Predicted transcriptional regulator [General function prediction only].	DNA
-PHD3_KDM5A_like	cd15610	PHD finger 3 found in Lysine-specific demethylase 5A (KDM5A)	DNA
-Sigma70_r4	cd06171	Sigma70	DNA
-COG2963	COG2963	Transposase and inactivated derivatives [DNA replication	DNA
+CD_CSD	cd00024	CHROMO (CHRromatin Organization Modifier) domains and chromo shadow domains.  Members of this group are chromodomains or chromo shadow domains; these are SH3-fold-beta-barrel domains of the chromo-like superfamily. Chromodomains lack the first strand of the SH3-fold-beta-barrel	DNA
+CD_DDE_transposase_like	cd18978	chromodomain of Rhizopus microsporus putative DDE transposases	DNA
+Chromo	pfam00385	Chromo (CHRromatin Organisation MOdifier) domain.	DNA
+CHROMO	smart00298	Chromatin organization modifier domain.	DNA
+CD_MT_like	cd18962	chromodomain of a putative Coemansia reversa NRRL 1564 methyltransferase	DNA
+CD_HP1_like	cd18631	chromodomain of heterochromatin protein 1 proteins	DNA
+CD_SUV39H1_like	cd18639	chromodomain of histone methyltransferase SUV39H1	DNA
+CD_Cbx2	cd18647	chromodomain of chromobox homolog 2.  CHRomatin Organization Modifier (chromo) domain of chromobox homolog 2 (CBX2)	DNA
 HTH_27	pfam13463	Winged helix DNA-binding domain.	DNA
 PHD2_3_BPTF	cd15560	PHD finger 2 and 3 found in bromodomain and PHD finger-containing transcription factor (BPTF).  BPTF	DNA
 COG1710	COG1710	Uncharacterized protein conserved in archaea [Function unknown].	DNA
+HNH_3	pfam13392	HNH endonuclease.  This is a zinc-binding loop of Fold group 7 as found in endo-deoxy-ribonucleases and HNH nucleases.	DNA
 HTH_50	pfam18024	Helix-turn-helix domain.  The TyrR protein of Haemophilus influenzae is a 36-kD transcription factor whose major function is to control the expression of genes important in the biosynthesis and transport of aromatic amino acids. This entry represents the C-terminal helix-turn-helix DNA-binding domain of TyrR and related proteins.	DNA
 HTH_LacI	cd01392	Helix-turn-helix (HTH) DNA binding domain of the LacI family of transcriptional regulators.  HTH-DNA binding domain of the LacI (lactose operon repressor) family of bacterial transcriptional regulators and their putative homologs found in plants. The LacI family has more than 500 members distributed among almost all bacterial species. The monomeric proteins of the LacI family contain common structural features that include a small DNA-binding domain with a helix-turn-helix motif in the N-terminus	DNA
 HTH_1	pfam00126	Bacterial regulatory helix-turn-helix protein	DNA
-rve	pfam00665	Integrase core domain.  Integrase mediates integration of a DNA copy of the viral genome into the host chromosome. Integrase is composed of three domains. The amino-terminal domain is a zinc binding domain pfam02022. This domain is the central catalytic domain. The carboxyl terminal domain that is a non-specific DNA binding domain pfam00552. The catalytic domain acts as an endonuclease when two nucleotides are removed from the 3' ends of the blunt-ended viral DNA made by reverse transcription. This domain also catalyzes the DNA strand transfer reaction of the 3' ends of the viral DNA to the 5' ends of the integration site.	DNA
+transpos_IS481	NF033577	IS481 family transposase.  null.	DNA
 HTH_20	pfam12840	Helix-turn-helix domain.  This domain represents a DNA-binding Helix-turn-helix domain found in transcriptional regulatory proteins.	DNA
 GerE	pfam00196	Bacterial regulatory proteins	DNA
-PHD_PYGO2	cd15636	PHD finger found in pygopus homolog 2 (PYGO2).  PYGO2 is a homolog of Drosophila melanogaster protein pygopus (dPYGO)	DNA
 PHD3_KMT2C	cd15511	PHD finger 3 found in Histone-lysine N-methyltransferase 2C (KMT2C).  KMT2C	DNA
+PHD_PYGO2	cd15636	PHD finger found in pygopus homolog 2 (PYGO2).  PYGO2 is a homolog of Drosophila melanogaster protein pygopus (dPYGO)	DNA
 HTH_ICLR	smart00346	helix_turn_helix isocitrate lyase regulation.	DNA
 HTH_5	pfam01022	Bacterial regulatory protein	DNA
 DUF995	pfam06191	Protein of unknown function (DUF995).  Family of uncharacterized Proteobacteria proteins.	DNA
 PRK00118	PRK00118	putative DNA-binding protein; Validated.	DNA
+PHA02517	PHA02517	putative transposase OrfB; Reviewed.	DNA
+CD_polycomb	cd18644	chromodomain of polycomb.  CHRomatin Organization Modifier (chromo) domain of the PcG (polycomb-group) chromodomain protein Polycomb (Pc) from Drosophila melanogaster	DNA
+CD_polycomb_like	cd18627	chromodomain of polycomb and chromobox family proteins.  CHRomatin Organization Modifier (chromo) domain of Polycomb and Polycomb-group (PcG) chromobox (CBX) family proteins such as CBX2	DNA
+CD_MarY1_POL_like	cd18975	chromodomain of Tricholoma matsutake polyprotein	DNA
+CD_Cbx7	cd18646	chromodomain of chromobox homolog 7.  CHRomatin Organization Modifier (chromo) domain of chromobox homolog 7 (CBX7)	DNA
+CD_HP1a_insect	cd18653	chromodomain of insect HP1a.  CHRomatin Organization Modifier (chromo) domain of insect HP1a. HP1a is a member of the heterochromatin protein family	DNA
+CD_HP1alpha_Cbx5	cd18651	chromodomain of heterochromatin protein 1 homolog alpha.  CHRomatin Organization Modifier (chromo) domain of heterochromatin protein 1 homolog alpha (also known as HP1alpha	DNA
+CD_Cbx4	cd18645	chromodomain of chromobox homolog 4.  CHRomatin Organization Modifier (chromo) domain of chromobox homolog 4 (CBX4)	DNA
+CD_Rhino	cd18630	chromodomain of Drosophila melanogaster Rhino	DNA
 ArsR	COG0640	Predicted transcriptional regulators [Transcription].	DNA
 HTH_IclR	pfam09339	IclR helix-turn-helix domain.	DNA
-HTH_ABP1_N	pfam18107	Fission yeast centromere protein N-terminal domain.  This domain is found in the fission yeast centromere protein (Abp1) in species such as Shizosaccharomyces pombe. The domain	DNA
 PHD_ING	cd15505	PHD finger found in the inhibitor of growth (ING) protein family.  The ING family includes a group of tumor suppressors	DNA
 PHD_ING1	cd15682	PHD finger found in inhibitor of growth protein 1 (ING1).  ING1 is an epigenetic regulator and a type II tumor suppressor that impacts cell growth	DNA
 PHD_ING1_2	cd15584	PHD finger found in inhibitor of growth protein 1 (ING1) and 2 (ING2).  ING1 is an epigenetic regulator and a type II tumor suppressor that impacts cell growth	DNA
 PHD_Yng1p_like	cd15587	PHD finger found in yeast orthologs of ING tumor suppressor family.  The yeast orthologs of the plant homeodomain (PHD) finger-containing ING tumor suppressor family consists of chromatin modification-related protein YNG1 (Yng1p)	DNA
 PHD_ING2	cd15683	PHD finger found in inhibitor of growth protein 2 (ING2).  ING2	DNA
 PHD_ING3	cd15585	PHD finger found in inhibitor of growth protein 3 (ING3) and similar proteins.  ING3	DNA
-PHD5_NSD	cd15568	PHD finger 5 found in nuclear receptor-binding SET domain-containing (NSD) proteins.  The nuclear receptor binding SET domain (NSD) protein is a family of three HMTases	DNA
 PHD_ING4_5	cd15586	PHD finger found in inhibitor of growth protein 4 (ING4) and 5 (ING5).  ING4	DNA
 PHD_ING5	cd15685	PHD finger found in inhibitor of growth protein 5 (ING5).  ING5	DNA
 PHD_ING4	cd15684	PHD finger found in inhibitor of growth protein 4 (ING4).  ING4	DNA
@@ -540,8 +595,8 @@ PHD_BAZ1A_like	cd15544	PHD finger found in bromodomain adjacent to zinc finger d
 PHD5_NSD1	cd15659	PHD finger 5 found in nuclear receptor-binding SET domain-containing protein 1 (NSD1).  NSD1	DNA
 PHD_UHRF1_2	cd15525	PHD finger found in ubiquitin-like PHD and RING finger domain-containing protein UHRF1 and UHRF2.  UHRF1 is a unique chromatin effector protein that integrates the recognition of both histone PTMs and DNA methylation. It is essential for cell proliferation and plays a critical role in the development and progression of many human carcinomas	DNA
 PHD_MMD1_like	cd15556	PHD finger found in Arabidopsis thaliana PHD finger protein MALE MEIOCYTE DEATH 1 (MMD1)	DNA
-Sigma70_r4	pfam04545	Sigma-70	DNA
-transpos_IS481	NF033577	IS481 family transposase.  null.	DNA
+OTU_VRTN	cd22791	OTU (ovarian tumor) domain of vertnin and similar proteins.  Vertnin (VRTN) is an OTU domain-containing protein that is required for the development of thoracic vertebrae in mammals. OTU domains typically function as deubiquitinases (DUBs)/ubiquitin thiolesterases (EC 3.4.19.12) that catalyze the thiol-dependent hydrolysis of ester	DNA
+transpos_IS3	NF033516	IS3 family transposase.	DNA
 HTH_XRE	cd00093	Helix-turn-helix XRE-family like proteins. Prokaryotic DNA binding proteins belonging to the xenobiotic response element family of transcriptional regulators.	DNA
 LZ_Tnp_IS481	pfam13011	leucine-zipper of insertion element IS481.  This is the upstream region of the conjoined ORF AB of insertion element 481. The significance of IS481 in the detection of Bordetella pertussis is discussed in. The B portion of the ORF AB carries the transposase activity in family rve	DNA
 Terminase_5	pfam06056	Putative ATPase subunit of terminase (gpP-like).  This family of proteins are annotated as ATPase subunits of phage terminase after. Terminases are viral proteins that are involved in packaging viral DNA into the capsid.	DNA
