@@ -38,7 +38,8 @@ def library_strainer(reference_path, additional_path, rps_out, in_seq_path, out_
     acceptable_domains_set = set(list(acceptable_df['ref']) + list(additional_df['ref']))
     # Read in rps blast results, filter small hits, split stitle
     rps_out_df = pd.read_table(rps_out)
-    rps_out_df = rps_out_df.query('length/slen >= 0.5').copy()
+    # Filter outs hits <50% of either database or query length
+    rps_out_df = rps_out_df.query('length/slen >= 0.5 | length >= qlen/6').copy()
     rps_out_df = rps_out_df.reset_index(drop=True)
     rps_out_df[['ref', 'abbrev', 'full']] = rps_out_df['stitle'].str.split(', ', n=2, expand = True)
     
