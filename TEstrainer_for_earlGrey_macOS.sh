@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-r Numver of iterations of BEET to run (deafult 10)] [-d Out directory, if not specified wil be created ] [-h Print this help] [-M Ammount of memory TEstrainer needs to keep free]" 1>&2; exit 1; }
+usage() { echo "Usage: [-l Repeat library] [-g Genome ] [-t Threads (default 4) ] [-f Flank (default 1000) ] [-m Minimum number of sequences required in multiple sequence alignments during BEAT] [-r Numver of iterations of BEET to run (deafult 10)] [-d Out directory, if not specified wil be created ] [-h Print this help] [-M Ammount of memory TEstrainer needs to keep free]" 1>&2; exit 1; }
 
 # default values
 STRAIN_SCRIPTS=INSERT_FILENAME_HERE
@@ -13,12 +13,13 @@ TIME=${TIME: -4}
 MEM_FREE="200M"
 
 # parsing
-while getopts l:g:t:f:r:d:h:M flag; do
+while getopts l:g:t::m:r:d:h:M flag; do
   case "${flag}" in
     l) RM_LIBRARY_PATH=${OPTARG};;
     g) GENOME=${OPTARG};;
     t) THREADS=${OPTARG};;
     f) FLANK=${OPTARG};;
+    m) MIN_SEQ=${OPTARG};;
     r) RUNS=${OPTARG};;
     d) DATA_DIR=${OPTARG};;
     M) MEM_FREE=${OPTARG};;
@@ -102,7 +103,7 @@ do
 
   # trim
   echo "Trimming run "${RUN_NO}
-  parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python ${STRAIN_SCRIPTS}/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}
+  parallel --bar --jobs $MAFFT_THREADS -a ${DATA_DIR}/run_${RUN_NO}/to_align.txt python ${STRAIN_SCRIPTS}/TEtrim.py -i ${DATA_DIR}/run_${RUN_NO}/mafft/{} -t 4 -f ${FLANK} -n ${RUN_NO} -d ${DATA_DIR}  -m ${MIN_SEQ}
   
   # compile completed curations
   if [ -n "$(ls -A ${DATA_DIR}/run_${RUN_NO}/TEtrim_complete/ 2>/dev/null)" ]; then
