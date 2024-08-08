@@ -3,7 +3,7 @@
 # make necessary directories
 def path_setup(out_dir):
     if(exists(out_dir+'/split') == False):
-        mkdir(out_dir+'/split')
+        Path(out_dir+'/split').mkdir(parents=True, exist_ok=True)
 
 # split fasta file
 def splitter(in_seq, out_dir):
@@ -26,25 +26,26 @@ def splitter(in_seq, out_dir):
 
 # run rpstblastn on single fasta file with custom blast headers
 def rpstblastn(blast_headers, seq_path):
-    print(seq_path)
+    from os import system
     rps_cmd='rpstblastn -query '+seq_path+' -db /Users/jgalbrai/Databases/Cdd/Cdd -out '+seq_path+'.rps.out -outfmt \"6 '+blast_headers+'\" -evalue 0.01 -num_threads 1'
     system(rps_cmd)
 
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
-    from os import mkdir, system
+    from pathlib import Path
     from os.path import exists
     from re import sub
     from Bio import SeqIO
     from multiprocessing import Pool
     from functools import partial
     import sys
+    import tqdm
 
     parser = ArgumentParser()
     parser.add_argument('-i', '--in_seq', type=str, required=True,
                         help='FASTA file containing in sequences')
-    parser.add_argument('-o', '--out_path', type=str, required=True,
+    parser.add_argument('-o', '--out_dir', type=str, required=True,
                         help='Path to file to write and compile rps out into')
     parser.add_argument('-b', '--blast_headers', type=str, default='qseqid qstart qend qlen slen length evalue bitscore stitle',
                         help='BLAST outfmt 6 variables to use')
@@ -59,14 +60,21 @@ if __name__ == "__main__":
 
     file_list=splitter(args.in_seq, args.out_dir)
     
+    print('Performing RPSTBLAST')
     with Pool(processes=args.num_threads) as pool:
         rpstblastn_func = partial(rpstblastn, args.blast_headers)
-        pool.map(rpstblastn_func, file_list)
+        max_ = len(file_list)
+        with tqdm.tqdm(total=max_) as pbar:
+            for _ in pool.imap_unordered(rpstblastn_func, file_list):
+                pbar.update()
 
     # compile rpsblast output with header
-    with open(args.out_path, 'w') as tsv:
+    print('Compiling RPSTBLAST output')
+    with open(args.in_seq+'.rps.out', 'w') as tsv:
         tsv.write(sub(' ', '\t', args.blast_headers)+'\n')
         for file in file_list:
-            with open(file+'.out', 'r') as rps:
+            with open(file+'.rps.out', 'r') as rps:
                 for line in rps:
                     tsv.write(line)
+    
+    

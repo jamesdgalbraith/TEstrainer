@@ -181,6 +181,6 @@ if __name__ == "__main__":
 
     # Remove split file and folder
     remove(args.out_dir+"/split/"+sub('.*/', '', args.in_seq)+"_split.txt")
-    rmdir(args.out_dir+"/split/")
+    # rmdir(args.out_dir+"/split/")
 
     

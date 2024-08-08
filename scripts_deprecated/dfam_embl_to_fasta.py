@@ -77,7 +77,7 @@ with open(args.in_file, 'r') as embl:
         # create and write file
         out_seq=SeqRecord(seq=Seq(new_seq),id=seq_id,description=seq_id, name=seq_id)
         o=args.out_dir+'/'+ID+'.fasta'
-        SeqIO.write(sequences=out_seq, handle=o, format="fasta") # write to individual file
+        # SeqIO.write(sequences=out_seq, handle=o, format="fasta") # write to individual file
         SeqIO.write(out_seq, compiled, "fasta") # write to compiled file
         seq_df=pd.concat([seq_df, pd.DataFrame(data={'ID': [ID], 'Subclass': [subclass], 'Family': [family], 'Name': [nm], 'Species': [os_embl], 'Taxonomy': [oc]})])
         # reset repeat sequence and classification
@@ -89,8 +89,5 @@ with open(args.in_file, 'r') as embl:
         oc=''
         os_embl=''
 
-
-    
-    
 # write df to file
 seq_df.to_csv(sub('.embl', '.tsv', args.in_file), sep='\t')
