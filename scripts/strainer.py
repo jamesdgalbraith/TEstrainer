@@ -2,6 +2,8 @@
 
 # make necessary directories
 def path_setup(out_dir):
+    if(exists(out_dir) == False):
+        Path(out_dir).mkdir(parents=True, exist_ok=True)
     if(exists(out_dir+'/split') == False):
         Path(out_dir+'/split').mkdir(parents=True, exist_ok=True)
 
@@ -181,6 +183,6 @@ if __name__ == "__main__":
 
     # Remove split file and folder
     remove(args.out_dir+"/split/"+sub('.*/', '', args.in_seq)+"_split.txt")
-    # rmdir(args.out_dir+"/split/")
+    rmdir(args.out_dir+"/split/")
 
     
