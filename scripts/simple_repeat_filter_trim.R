@@ -30,7 +30,9 @@ in_seq_tbl <- tibble(seqnames = names(in_seq), og_width = width(in_seq)) %>%
 
 #  If no simple repeats were found by any of the three tools exit early, creating necessary files
 if(
-  file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr")) == 0 &
+  nrow(
+    read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"),
+             skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F)) == 0 &
   file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".trf")) == 0 &
   file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps")) == 0
 ){
@@ -39,8 +41,10 @@ if(
 } else {
 
   # read in, rearrange and calculate percent tandem repeats for SA-SSR data
-  # check sassr empty, if so create empty tbl, else analyse data
-  if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr")) == 0){
+  # check sassr only header, if so create empty tbl, else analyse data
+  if(nrow(
+    read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"),
+             skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F)) == 0){
     
     sassr_calc <- tibble(seqnames = character(), sassr_perc_tr = double())
     
