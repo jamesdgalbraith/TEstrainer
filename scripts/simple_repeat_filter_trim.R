@@ -39,7 +39,7 @@ if(
   writeXStringSet(in_seq, paste0(opt$directory, "/trf/", opt$out_seq, ".nonsatellite"))
   message("No satellites found")
 } else {
-
+  
   # read in, rearrange and calculate percent tandem repeats for SA-SSR data
   # check sassr only header, if so create empty tbl, else analyse data
   if(nrow(
@@ -53,13 +53,14 @@ if(
                            ssr = character(), ssr_width = double(), package = "sassr")
     
   } else {
-  
+    
     sassr <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".sassr"), 
-                      skip = 1, col_names = c("seqnames", "ssr", "count", "start"), col_types = "ccdd") %>%
+                      skip = 1, col_names = c("seqnames", "ssr", "count", "start"), show_col_types = F, col_types = "ccdd") %>%
+      mutate_if(is.logical, ~gsub("RUE|ALSE", "", .)) %>%
       dplyr::mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
                     period = as.double(width(ssr))) %>%
       dplyr::mutate(ssr_width = count*period, end = start + ssr_width, start = start +1) %>%
-                    mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
+      mutate(draft_seqnames = sub("#.*", "", seqnames)) %>%
       inner_join(in_seq_tbl, by = "seqnames") %>%
       arrange(seqnames) %>%
       filter(count > 2)
@@ -77,21 +78,22 @@ if(
     
     sassr_select <- sassr %>% select(seqnames, start, end, period, count, og_width, ssr, ssr_width) %>%
       mutate(package = "sassr")
-  
+    
   }
   
   # check trf empty, if so create empty tbl, else analyse data
   # read in, rearrange and calculate percent tandem repeats for TRF data
   if(file.size(paste0(opt$directory, "/trf/", opt$out_seq, ".trf")) == 0){
     trf_select <- tibble(seqnames = character(), start = double(), end = double(),
-                           period = double(), count = double(), og_width = integer(),
-                           ssr = character(), ssr_width = double(), package = "trf")
+                         period = double(), count = double(), og_width = integer(),
+                         ssr = character(), ssr_width = double(), package = "trf")
     
     trf_calc <- tibble(seqnames = character(), trf_perc_tr = double())
     
   } else {
     trf <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".trf"),
-                    col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), col_types = c("cddddc")) %>%
+                    col_names = c("draft_seqnames", "start", "end", "period", "count", "ssr"), show_col_types = F, col_types = "cddddc") %>%
+      mutate_if(is.logical, ~gsub("RUE|ALSE", "", .)) %>%
       mutate(ssr = ifelse(is.na(ssr), "NA", ssr),
              draft_seqnames = sub("@", "", sub("#.*", "", draft_seqnames))) %>%
       dplyr::mutate(ssr_width = end - start + 1) %>%
@@ -124,10 +126,11 @@ if(
                            ssr = character(), ssr_width = double(), package = "mreps")
     
     mreps_calc <- tibble(seqnames = character(), mreps_perc_tr = double())
-  
+    
   } else {
     mreps <- read_tsv(paste0(opt$directory, "/trf/", opt$out_seq, ".mreps"),
-                      col_names = c("draft_seqnames", "start", "end", "ssr_width", "period", "count", "error", "sequence"), col_types = c("cdddddcc")) %>%
+                      col_names = c("draft_seqnames", "start", "end", "ssr_width", "period", "count", "error", "sequence"), show_col_types = F, col_types = "cdddddcc") %>%
+      mutate_if(is.logical, ~gsub("RUE|ALSE", "", .)) %>%
       mutate(ssr = substr(x = sequence, start = 0, stop = period)) %>%
       inner_join(in_seq_tbl, by = "draft_seqnames")
     
